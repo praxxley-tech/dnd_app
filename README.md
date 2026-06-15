@@ -562,7 +562,16 @@
 </html>
 
 
-Kurze Übersicht der wichtigsten Teile:
+
+Bereich,Was es macht,Kommentar-Stil
+Navigation + Tabs,"Wechselt zwischen Karten, Charakteren, Spellbook etc.",Sehr gut strukturiert
+Leaflet Map,"Interaktive Weltkarte mit Pins, Routen und Rechtsklick zum Hinzufügen","loadPins(), Drag & Drop"
+loadEntities(),Die große zentrale Funktion – rendert fast alle Karten dynamisch,Sehr mächtig
+Spellbook,Schönes animiertes Buch mit API-Import von dnd5eapi.co,toggleSpellbook()
+Questbook,Gruppen- vs. persönliche Quests + Passwort-Schutz,Sehr komplex
+Bastion Tactical Map,Separate Leaflet-Karte mit Tokens (Enemy/Player/Trap),openTacticalMap()
+Treasury,Münzverwaltung mit Edit-Modus,Sehr clean
+Edit Mode,Zeigt/versteckt alle Bearbeiten-Buttons global,toggleEditMode()
 
 
 
@@ -597,20 +606,3 @@ Kurze Übersicht der wichtigsten Teile:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-BereichWas es machtKommentar-StilNavigation + TabsWechselt zwischen Karten, Charakteren, Spellbook etc.Sehr gut strukturiertLeaflet MapInteraktive Weltkarte mit Pins, Routen und Rechtsklick zum HinzufügenloadPins(), Drag & DroploadEntities()Die große zentrale Funktion – rendert fast alle Karten dynamischSehr mächtigSpellbookSchönes animiertes Buch mit API-Import von dnd5eapi.cotoggleSpellbook()QuestbookGruppen- vs. persönliche Quests + Passwort-SchutzSehr komplexBastion Tactical MapSeparate Leaflet-Karte mit Tokens (Enemy/Player/Trap)openTacticalMap()TreasuryMünzverwaltung mit Edit-ModusSehr cleanEdit ModeZeigt/versteckt alle Bearbeiten-Buttons globaltoggleEditMode()
