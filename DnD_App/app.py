@@ -109,8 +109,37 @@ class Quest(db.Model):
     character_id = db.Column(db.Integer, nullable=True) 
     status = db.Column(db.String(50), default='active') 
 
+class BastionToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    bastion_id = db.Column(db.Integer, nullable=False)
+    y = db.Column(db.Float, nullable=False)
+    x = db.Column(db.Float, nullable=False)
+    label = db.Column(db.String(100), nullable=False)
+    icon_type = db.Column(db.String(50), nullable=False)
+
+# --- NEU: Schatzkammer Modelle ---
+class Treasury(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    platinum = db.Column(db.Integer, default=0)
+    gold = db.Column(db.Integer, default=0)
+    silver = db.Column(db.Integer, default=0)
+    copper = db.Column(db.Integer, default=0)
+
+class Loot(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    image = db.Column(db.String(300))
+    holder_id = db.Column(db.Integer, nullable=True) # Wer trägt das Item? (Character ID)
+
+
 with app.app_context():
     db.create_all()
+    
+    # Initiale Schatzkammer anlegen, falls noch nicht vorhanden
+    if not Treasury.query.first():
+        db.session.add(Treasury(platinum=0, gold=0, silver=0, copper=0))
+        db.session.commit()
     
     # --- AUTOMATISCHER DATENBANK-SCHUTZ TRICK ---
     try: db.session.execute(text("ALTER TABLE character ADD COLUMN background VARCHAR(100)")); db.session.commit()
@@ -149,6 +178,7 @@ with app.app_context():
     try: db.session.execute(text("ALTER TABLE dragon ADD COLUMN habitat TEXT")); db.session.commit()
     except: db.session.rollback()
 
+
 def save_image(file):
     if file and file.filename != '':
         filename = secure_filename(file.filename)
@@ -157,13 +187,13 @@ def save_image(file):
         return f"/static/uploads/{filename}"
     return ""
 
-# --- LOGIN & AUTH ---
 def get_auth_role():
     return session.get('role', 'none')
 
 def is_auth():
     return get_auth_role() in ['editor', 'admin']
 
+# --- AUTH ROUTES ---
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
@@ -198,7 +228,7 @@ def verify_char_pwd():
         return jsonify({"success": True})
     return jsonify({"success": False})
 
-# --- DATA ROUTES ---
+# --- MAP & TOKENS ---
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -245,6 +275,40 @@ def modify_pin(id):
         db.session.commit()
         return jsonify({"message": "Deleted"}), 200
 
+@app.route('/api/bastion/<int:b_id>/tokens', methods=['GET', 'POST'])
+def handle_bastion_tokens(b_id):
+    if request.method == 'POST':
+        if not is_auth(): return jsonify({"error": "Unauthorized"}), 401
+        new_t = BastionToken(
+            bastion_id=b_id,
+            y=float(request.form.get('y')),
+            x=float(request.form.get('x')),
+            label=request.form.get('label', 'Token'),
+            icon_type=request.form.get('icon_type', 'enemy')
+        )
+        db.session.add(new_t)
+        db.session.commit()
+        return jsonify({"success": True, "id": new_t.id}), 201
+    tokens = BastionToken.query.filter_by(bastion_id=b_id).all()
+    return jsonify([{"id": t.id, "y": t.y, "x": t.x, "label": t.label, "icon_type": t.icon_type} for t in tokens])
+
+@app.route('/api/bastion/tokens/<int:t_id>', methods=['PUT', 'DELETE'])
+def modify_bastion_token(t_id):
+    if not is_auth(): return jsonify({"error": "Unauthorized"}), 401
+    t = BastionToken.query.get_or_404(t_id)
+    if request.method == 'PUT':
+        data = request.json
+        if data:
+            if 'y' in data: t.y = float(data['y'])
+            if 'x' in data: t.x = float(data['x'])
+        db.session.commit()
+        return jsonify({"success": True}), 200
+    elif request.method == 'DELETE':
+        db.session.delete(t)
+        db.session.commit()
+        return jsonify({"success": True}), 200
+
+# --- ENTITIES ---
 def handle_entities(model):
     if request.method == 'POST':
         if not is_auth(): return jsonify({"error": "Unauthorized"}), 401
@@ -292,6 +356,9 @@ def handle_entities(model):
             kwargs['abilities'] = request.form.get('abilities', '')
             kwargs['behavior'] = request.form.get('behavior', '')
             kwargs['habitat'] = request.form.get('habitat', '')
+        elif model == Loot:
+            h_id = request.form.get('holder_id')
+            kwargs['holder_id'] = int(h_id) if h_id else None
             
         new_entity = model(**kwargs)
         db.session.add(new_entity)
@@ -326,6 +393,8 @@ def handle_entities(model):
             data['abilities'] = getattr(e, 'abilities', '')
             data['behavior'] = getattr(e, 'behavior', '')
             data['habitat'] = getattr(e, 'habitat', '')
+        elif model == Loot:
+            data['holder_id'] = getattr(e, 'holder_id', None)
         result.append(data)
     return jsonify(result)
 
@@ -349,7 +418,6 @@ def modify_entity(model, id):
             if 'appearance' in request.form: entity.appearance = request.form['appearance']
             pwd = request.form.get('char_password')
             if pwd: entity.char_password = pwd
-            
             new_sb_img = save_image(request.files.get('spellbook_image'))
             if new_sb_img: entity.spellbook_image = new_sb_img
         elif model == NPC:
@@ -366,6 +434,9 @@ def modify_entity(model, id):
             if 'abilities' in request.form: entity.abilities = request.form['abilities']
             if 'behavior' in request.form: entity.behavior = request.form['behavior']
             if 'habitat' in request.form: entity.habitat = request.form['habitat']
+        elif model == Loot:
+            h_id = request.form.get('holder_id')
+            entity.holder_id = int(h_id) if h_id else None
         
         new_image = save_image(request.files.get('image'))
         if new_image: entity.image = new_image
@@ -417,6 +488,33 @@ def quests(): return handle_entities(Quest)
 @app.route('/api/quests/<int:id>', methods=['PUT', 'DELETE'])
 def modify_quest(id): return modify_entity(Quest, id)
 
+@app.route('/api/loot', methods=['GET', 'POST'])
+def loot(): return handle_entities(Loot)
+@app.route('/api/loot/<int:id>', methods=['PUT', 'DELETE'])
+def modify_loot(id): return modify_entity(Loot, id)
+
+# --- TREASURY (GOLD) ---
+@app.route('/api/treasury', methods=['GET', 'PUT'])
+def handle_treasury():
+    t = Treasury.query.first()
+    if request.method == 'PUT':
+        if not is_auth(): return jsonify({"error": "Unauthorized"}), 401
+        data = request.json
+        if 'platinum' in data: t.platinum = int(data['platinum'])
+        if 'gold' in data: t.gold = int(data['gold'])
+        if 'silver' in data: t.silver = int(data['silver'])
+        if 'copper' in data: t.copper = int(data['copper'])
+        db.session.commit()
+        return jsonify({"message": "Treasury updated"}), 200
+    
+    return jsonify({
+        "platinum": t.platinum,
+        "gold": t.gold,
+        "silver": t.silver,
+        "copper": t.copper
+    })
+
+# --- SPELLS ---
 @app.route('/api/spells', methods=['GET', 'POST'])
 def spells():
     if request.method == 'POST':

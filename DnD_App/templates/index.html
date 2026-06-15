@@ -98,8 +98,8 @@
         .rep-container { width: 100%; background: #111; border: 1px solid #444; border-radius: 4px; height: 12px; overflow: hidden; position: relative; }
         .rep-bar { height: 100%; transition: width 0.4s ease, background-color 0.4s ease; }
 
-        /* Spellbook CSS */
-        .spellbook-wrapper { grid-column: 1 / -1; display: flex; justify-content: center; width: 100%; padding: 20px 0; }
+        /* Books CSS */
+        .spellbook-wrapper, .quest-book-wrapper { grid-column: 1 / -1; display: flex; justify-content: center; width: 100%; padding: 20px 0; }
         .spellbook-cover { background: linear-gradient(135deg, #1f0d35, #42236d); border: 4px solid #cda434; border-radius: 5px 18px 18px 5px; box-shadow: inset 10px 0 30px rgba(0,0,0,0.8), 10px 10px 25px rgba(0,0,0,0.7); color: #cda434; text-align: center; padding: 80px 30px; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; width: 100%; max-width: 350px; user-select: none; }
         .spellbook-cover:hover { transform: scale(1.03) perspective(500px) rotateY(-5deg); box-shadow: inset 10px 0 30px rgba(0,0,0,0.8), 15px 15px 30px rgba(0,0,0,0.8); }
         .custom-spellbook-cover { border: none; border-radius: 5px 18px 18px 5px; box-shadow: 10px 10px 25px rgba(0,0,0,0.7); cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; width: 100%; max-width: 350px; overflow: hidden; display: flex; }
@@ -115,57 +115,17 @@
         .spell-stats strong { color: #5c3a21; }
         .spell-desc { font-size: 15px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 15px; color: #222; }
         .spell-footer { font-size: 13px; color: #555; border-top: 1px dashed #aaa; padding-top: 10px; margin-top: 15px;}
-
-        /* Quest & Protocol Book CSS */
-        .quest-book-wrapper { grid-column: 1 / -1; display: flex; justify-content: center; width: 100%; padding: 20px 0; }
         
-        .quest-cover { 
-            background-image: url('/static/acc.jpg'); 
-            background-size: cover; 
-            background-position: center; 
-            border: 4px solid #cda434; 
-            border-radius: 8px; 
-            box-shadow: 10px 10px 25px rgba(0,0,0,0.8); 
-            cursor: pointer; 
-            transition: transform 0.4s ease, box-shadow 0.4s ease; 
-            width: 100%; 
-            max-width: 400px; 
-            height: 550px; 
-            user-select: none; 
-            position: relative;
-        }
+        .quest-cover { background-image: url('/static/acc.jpg'); background-size: cover; background-position: center; border: 4px solid #cda434; border-radius: 8px; box-shadow: 10px 10px 25px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; width: 100%; max-width: 400px; height: 550px; user-select: none; position: relative; }
         .quest-cover:hover { transform: scale(1.02) perspective(600px) rotateY(-5deg); box-shadow: 15px 15px 35px rgba(0,0,0,0.9); }
         
-        .protocol-cover { 
-            background-image: url('/static/council.jpg'); 
-            background-size: cover; 
-            background-position: center; 
-            border: 4px solid #cda434; 
-            border-radius: 8px; 
-            box-shadow: 10px 10px 25px rgba(0,0,0,0.8); 
-            cursor: pointer; 
-            transition: transform 0.4s ease, box-shadow 0.4s ease; 
-            width: 100%; 
-            max-width: 400px; 
-            height: 550px; 
-            user-select: none; 
-            position: relative;
-        }
+        /* Das ist das neue Council-Cover */
+        .protocol-cover { background-image: url('/static/council.jpg'); background-size: cover; background-position: center; border: 4px solid #cda434; border-radius: 8px; box-shadow: 10px 10px 25px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; width: 100%; max-width: 400px; height: 550px; user-select: none; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .protocol-cover:hover { transform: scale(1.02) perspective(600px) rotateY(-5deg); box-shadow: 15px 15px 35px rgba(0,0,0,0.9); }
 
         .quest-pages { display: flex; width: 100%; max-width: 700px; animation: openBookAnim 0.5s ease-out forwards; justify-content: center; }
-        .quest-page { 
-            width: 100%; 
-            background-image: url('/static/image_b0505c.jpg'); 
-            background-size: cover; 
-            background-position: center;
-            color: #2b1b07; 
-            padding: 40px 40px 80px 40px; 
-            min-height: 600px; 
-            position: relative; 
-            border-radius: 4px; 
-            box-shadow: 5px 5px 20px rgba(0,0,0,0.8); 
-        }
+        .quest-page { width: 100%; background-image: url('/static/image_b0505c.jpg'); background-size: cover; background-position: center; color: #2b1b07; padding: 40px 40px 80px 40px; min-height: 600px; position: relative; border-radius: 4px; box-shadow: 5px 5px 20px rgba(0,0,0,0.8); }
+
         .quest-page-title { font-family: 'Cinzel', serif; font-size: 28px; color: #5c3a21; text-align: center; border-bottom: 2px solid #8b5a2b; padding-bottom: 10px; margin-top: 0; margin-bottom: 25px; text-transform: uppercase; }
         .quest-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed #dcb38a; }
         .quest-item h4 { margin: 0 0 5px 0; font-family: 'Cinzel', serif; font-size: 18px; color: #8b2b2b; }
@@ -178,11 +138,32 @@
         .quest-nav-btn { background: #5c3a21; color: #fdf5e6; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; font-size: 14px; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
         .quest-nav-btn:hover { background: #8b5a2b; }
 
-        .action-buttons, .route-edit, .add-details { display: none !important; }
-        body.edit-mode .action-buttons, body.edit-mode .route-edit { display: flex !important; }
+        /* Treasury CSS */
+        .treasury-board { background: #1a1a1a; border: 2px solid var(--primary-color); border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .coins-container { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 15px; }
+        .coin-box { background: #000; border: 1px solid #444; padding: 10px 15px; border-radius: 5px; min-width: 100px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+        .coin-box.pp { border-bottom: 4px solid #e5e4e2; }
+        .coin-box.gp { border-bottom: 4px solid #ffd700; }
+        .coin-box.sp { border-bottom: 4px solid #c0c0c0; }
+        .coin-box.cp { border-bottom: 4px solid #b87333; }
+        .coin-label { font-family: 'Cinzel', serif; font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .coin-val { font-size: 24px; font-weight: bold; font-family: 'Cinzel', serif; }
+        
+        .treasury-edit-mode .coin-val { display: none; }
+        .treasury-edit-mode .coin-input { display: block; width: 100%; padding: 5px; text-align: center; background: #222; color: #fff; border: 1px solid #555; font-family: 'Cinzel', serif; font-size: 18px; }
+        .coin-input { display: none; }
+
+        .loot-holder-badge { display: inline-block; background: var(--primary-color); color: #000; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; font-family: 'Cinzel', serif; margin-bottom: 10px; }
+
+        .action-buttons, .route-edit, .add-details, .edit-treasury-btns { display: none !important; }
+        body.edit-mode .action-buttons, body.edit-mode .route-edit, body.edit-mode .edit-treasury-btns { display: flex !important; }
         body.edit-mode .add-details { display: block !important; }
+        
         .api-search-box { background: rgba(139, 90, 43, 0.2); border: 1px solid var(--primary-color); border-radius: 4px; padding: 10px; width: 100%; display: flex; gap: 10px; margin-bottom: 15px; box-sizing: border-box; align-items: center; }
 
+        /* Tactical Token CSS */
+        .custom-token-icon { border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
         @media (max-width: 900px) {
             .quest-pages { flex-direction: column; }
             .quest-page.left { border-radius: 4px 4px 0 0; border-right: none; border-bottom: 2px solid #8b5a2b; box-shadow: inset 0 -15px 20px rgba(0,0,0,0.1); }
@@ -197,8 +178,7 @@
             .add-form button { width: 100% !important; }
             .leaflet-popup-content-wrapper { width: 240px; }
             .api-search-box { flex-direction: column; align-items: stretch; }
-            .spellbook-pages { padding: 15px; }
-            .quest-page { padding: 30px 20px 80px 20px; }
+            .spellbook-pages, .quest-page { padding: 30px 20px 80px 20px; }
             .quest-nav-container { padding: 0 20px; }
         }
     </style>
@@ -217,10 +197,11 @@
         <button class="tab-btn" onclick="switchTab('factions-section', this)">Factions</button>
         <button class="tab-btn" onclick="switchTab('dragons-section', this)">Dragons</button>
         <button class="tab-btn" onclick="switchTab('gallery-section', this)">Gallery</button>
-        <button class="tab-btn" onclick="switchTab('bastion-section', this)">Bastion</button>
-        <button class="tab-btn" onclick="switchTab('protocols-section', this)">Council Protocol</button>
+        <button class="tab-btn" onclick="switchTab('bastion-section', this)">Bastion Maps</button>
+        <button class="tab-btn" onclick="switchTab('protocols-section', this)">Council</button>
         <button class="tab-btn" onclick="switchTab('spells-section', this)">Spellbook</button>
         <button class="tab-btn" onclick="switchTab('quests-section', this)">Quests</button>
+        <button class="tab-btn" onclick="switchTab('treasury-section', this)">Treasury</button>
 
         <button id="auth-btn" class="btn" style="width: auto; padding: 5px 15px; background-color: #3ab34a; color: white; border: 1px solid var(--primary-color); margin-left:auto;" onclick="openLogin()">🔒 Login</button>
         <button id="edit-mode-btn" class="btn" style="display: none; width: auto; padding: 5px 15px; background-color: #555; color: white; border: 1px solid var(--primary-color);" onclick="toggleEditMode()">👁️ View Mode</button>
@@ -242,18 +223,9 @@
                     </div>
                     <textarea id="char-app" placeholder="Appearance (Height, Hair, Scars...)" style="height: 60px; width: 100%;"></textarea>
                     <textarea id="char-desc" placeholder="Backstory & Notes" style="height: 80px; width: 100%;"></textarea>
-                    <div style="width: 100%;">
-                        <label class="file-upload-label">Upload Image:</label>
-                        <input type="file" id="char-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box; margin-bottom: 5px;">
-                    </div>
-                    <div style="width: 100%;">
-                        <label class="file-upload-label" style="color:#9c27b0;">Upload Spellbook Cover (optional):</label>
-                        <input type="file" id="char-spellbook_image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box; margin-bottom: 5px;">
-                    </div>
-                    <div style="width: 100%;">
-                        <label class="file-upload-label" style="color:#b33a3a;">Password for personal secrets/quests:</label>
-                        <input type="text" id="char-password" placeholder="Set password..." style="width: 100%; box-sizing: border-box;">
-                    </div>
+                    <div style="width: 100%;"><label class="file-upload-label">Upload Image:</label><input type="file" id="char-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box; margin-bottom: 5px;"></div>
+                    <div style="width: 100%;"><label class="file-upload-label" style="color:#9c27b0;">Upload Spellbook Cover (optional):</label><input type="file" id="char-spellbook_image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box; margin-bottom: 5px;"></div>
+                    <div style="width: 100%;"><label class="file-upload-label" style="color:#b33a3a;">Password for personal secrets/quests:</label><input type="text" id="char-password" placeholder="Set password..." style="width: 100%; box-sizing: border-box;"></div>
                     <button class="btn" style="width:100%; margin-top: 10px;" onclick="addEntity('chars')">Save Character</button>
                 </div>
             </details>
@@ -269,15 +241,8 @@
                     <textarea id="npc-appearance" placeholder="Appearance:" style="height: 60px; width: 100%;"></textarea>
                     <textarea id="npc-special" placeholder="Special:" style="height: 60px; width: 100%;"></textarea>
                     <textarea id="npc-desc" placeholder="General Notes / Description" style="height: 80px; width: 100%;"></textarea>
-                    
-                    <div style="width: 100%; margin-bottom: 5px;">
-                        <label class="file-upload-label">Relationship to Party (Hostile ➔ Friendly):</label>
-                        <input type="range" id="npc-rep" min="0" max="100" value="50" style="width: 100%; cursor: pointer;">
-                    </div>
-                    <div style="width: 100%;">
-                        <label class="file-upload-label">Upload Image:</label>
-                        <input type="file" id="npc-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
-                    </div>
+                    <div style="width: 100%; margin-bottom: 5px;"><label class="file-upload-label">Relationship to Party (Hostile ➔ Friendly):</label><input type="range" id="npc-rep" min="0" max="100" value="50" style="width: 100%; cursor: pointer;"></div>
+                    <div style="width: 100%;"><label class="file-upload-label">Upload Image:</label><input type="file" id="npc-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;"></div>
                     <button class="btn" style="width:100%;" onclick="addEntity('npcs')">Save</button>
                 </div>
             </details>
@@ -293,10 +258,7 @@
                     <textarea id="faction-goal" placeholder="Goal:" style="height: 60px; width: 100%;"></textarea>
                     <textarea id="faction-known_for" placeholder="Known for:" style="height: 60px; width: 100%;"></textarea>
                     <textarea id="faction-desc" placeholder="General Description" style="height: 80px; width: 100%;"></textarea>
-                    <div style="width: 100%;">
-                        <label class="file-upload-label">Upload Image:</label>
-                        <input type="file" id="faction-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
-                    </div>
+                    <div style="width: 100%;"><label class="file-upload-label">Upload Image:</label><input type="file" id="faction-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;"></div>
                     <button class="btn" style="width:100%;" onclick="addEntity('factions')">Save</button>
                 </div>
             </details>
@@ -313,10 +275,7 @@
                     <textarea id="dragon-behavior" placeholder="Behavior (Mentality/Traits):" style="height: 60px; width: 100%;"></textarea>
                     <textarea id="dragon-habitat" placeholder="Habitat (Lair/Terrain):" style="height: 60px; width: 100%;"></textarea>
                     <textarea id="dragon-desc" placeholder="Deeds, Notes & Special Features..." style="height: 80px; width: 100%;"></textarea>
-                    <div style="width: 100%;">
-                        <label class="file-upload-label">Upload Image:</label>
-                        <input type="file" id="dragon-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
-                    </div>
+                    <div style="width: 100%;"><label class="file-upload-label">Upload Image:</label><input type="file" id="dragon-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;"></div>
                     <button class="btn" style="width:100%;" onclick="addEntity('dragons')">Save</button>
                 </div>
             </details>
@@ -329,10 +288,7 @@
                 <div class="add-form">
                     <input type="text" id="gallery-name" placeholder="Image Title / Scene / Item" style="width: 100%;">
                     <textarea id="gallery-desc" placeholder="Short note or description..." style="height: 80px; width: 100%;"></textarea>
-                    <div style="width: 100%;">
-                        <label class="file-upload-label">Upload Image:</label>
-                        <input type="file" id="gallery-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
-                    </div>
+                    <div style="width: 100%;"><label class="file-upload-label">Upload Image:</label><input type="file" id="gallery-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;"></div>
                     <button class="btn" style="width:100%;" onclick="addEntity('gallery')">Save Image</button>
                 </div>
             </details>
@@ -340,19 +296,26 @@
         </div>
 
         <div id="bastion-section" class="section">
-            <details class="add-details" id="details-bastion">
-                <summary>➕ Upload New Battlemap</summary>
-                <div class="add-form">
-                    <input type="text" id="bastion-name" placeholder="Map Name (e.g. Hatchery)" style="width: 100%;">
-                    <textarea id="bastion-desc" placeholder="Enemies, Traps or Notes..." style="height: 80px; width: 100%;"></textarea>
-                    <div style="width: 100%;">
-                        <label class="file-upload-label">Upload Battlemap:</label>
-                        <input type="file" id="bastion-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
+            <div id="bastion-list-view">
+                <details class="add-details" id="details-bastion">
+                    <summary>➕ Upload New Battlemap</summary>
+                    <div class="add-form">
+                        <input type="text" id="bastion-name" placeholder="Map Name (e.g. Hatchery)" style="width: 100%;">
+                        <textarea id="bastion-desc" placeholder="Enemies, Traps or Notes..." style="height: 80px; width: 100%;"></textarea>
+                        <div style="width: 100%;"><label class="file-upload-label">Upload Battlemap:</label><input type="file" id="bastion-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;"></div>
+                        <button class="btn" style="width:100%;" onclick="addEntity('bastion')">Save Map</button>
                     </div>
-                    <button class="btn" style="width:100%;" onclick="addEntity('bastion')">Save Map</button>
+                </details>
+                <div class="grid-container" id="bastion-grid"></div>
+            </div>
+            
+            <div id="bastion-map-view" style="display:none; flex-direction:column; height:calc(100vh - 120px); position:relative;">
+                <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
+                    <button class="btn btn-danger" style="width:auto; padding:8px 15px;" onclick="closeTacticalMap()">⬅ Back to Maps</button>
+                    <h3 id="bastion-map-title" style="margin:0; font-family:'Cinzel',serif; color:var(--primary-color);">Battlemap</h3>
                 </div>
-            </details>
-            <div class="grid-container" id="bastion-grid"></div>
+                <div id="bastion-map" style="width:100%; flex-grow:1; background:#000; border:2px solid var(--primary-color); border-radius:4px; min-height:450px; position:relative;"></div>
+            </div>
         </div>
 
         <div id="protocols-section" class="section">
@@ -361,10 +324,7 @@
                 <div class="add-form">
                     <input type="text" id="protocol-name" placeholder="Title (e.g. First Council Meeting)" style="width: 100%;">
                     <textarea id="protocol-desc" placeholder="What was discussed? Who agreed, who opposed?" style="height: 150px; width: 100%; font-family: 'Lora', serif;"></textarea>
-                    <div style="width: 100%;">
-                        <label class="file-upload-label">Upload Image/Handout (optional):</label>
-                        <input type="file" id="protocol-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
-                    </div>
+                    <div style="width: 100%;"><label class="file-upload-label">Upload Image/Handout (optional):</label><input type="file" id="protocol-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;"></div>
                     <button class="btn" style="width:100%;" onclick="addEntity('protocols')">Save Protocol</button>
                 </div>
             </details>
@@ -386,20 +346,11 @@
                     </div>
                     <hr style="border:1px solid #444; width:100%; margin-bottom:15px;">
                     <input type="text" id="spell-name" placeholder="Name (e.g. Fireball)" style="width: 100%;">
-                    <div style="display: flex; gap: 10px; width: 100%;">
-                        <input type="text" id="spell-level_school" placeholder="Level & School (e.g. 3rd-level evocation)">
-                        <input type="text" id="spell-casting_time" placeholder="Casting Time (e.g. 1 action)">
-                    </div>
-                    <div style="display: flex; gap: 10px; width: 100%;">
-                        <input type="text" id="spell-range" placeholder="Range (e.g. 150 feet)">
-                        <input type="text" id="spell-duration" placeholder="Duration (e.g. Instantaneous)">
-                    </div>
+                    <div style="display: flex; gap: 10px; width: 100%;"><input type="text" id="spell-level_school" placeholder="Level & School"><input type="text" id="spell-casting_time" placeholder="Casting Time"></div>
+                    <div style="display: flex; gap: 10px; width: 100%;"><input type="text" id="spell-range" placeholder="Range"><input type="text" id="spell-duration" placeholder="Duration"></div>
                     <input type="text" id="spell-components" placeholder="Components (e.g. V, S, M)" style="width: 100%;">
                     <textarea id="spell-description" placeholder="Description (Damage, Saving Throws...)" style="height: 120px; width: 100%;"></textarea>
-                    <div style="display: flex; gap: 10px; width: 100%;">
-                        <input type="text" id="spell-classes" placeholder="Classes (e.g. Sorcerer, Wizard)">
-                        <input type="text" id="spell-source" placeholder="Source (e.g. PHB'14 p241)">
-                    </div>
+                    <div style="display: flex; gap: 10px; width: 100%;"><input type="text" id="spell-classes" placeholder="Classes"><input type="text" id="spell-source" placeholder="Source"></div>
                     <button class="btn" style="width:100%;" onclick="addSpell()">Save Spell</button>
                 </div>
             </details>
@@ -411,7 +362,6 @@
                 <summary>➕ Add New Quest</summary>
                 <div class="add-form">
                     <input type="text" id="quest-title" placeholder="Quest Title / Milestone Name" style="width: 100%;">
-                    
                     <div style="width: 100%; margin-bottom: 5px;">
                         <label class="file-upload-label">Quest Type:</label>
                         <select id="quest-is-group" onchange="toggleQuestCharSelect()" style="width: 100%;">
@@ -419,20 +369,52 @@
                             <option value="false">Personal Character Secret / Motive</option>
                         </select>
                     </div>
-                    
                     <div id="quest-char-wrapper" style="display: none; width: 100%;">
-                        <label class="file-upload-label">For which character (Requires password to view):</label>
+                        <label class="file-upload-label">For which character:</label>
                         <select id="quest-char-id" style="width: 100%;"></select>
                     </div>
-
                     <textarea id="quest-desc" placeholder="Quest details or DM notes..." style="height: 120px; width: 100%;"></textarea>
                     <button class="btn" style="width:100%;" onclick="saveQuest()">Save Quest</button>
                 </div>
             </details>
-            
             <div class="grid-container" id="quests-grid" style="display: flex; justify-content: center; grid-template-columns: 1fr;"></div>
         </div>
 
+        <div id="treasury-section" class="section">
+            <div class="treasury-board" id="treasury-board">
+                <h2 style="font-family:'Cinzel', serif; color:var(--primary-color); margin-top:0;">Party Treasury</h2>
+                <div class="coins-container">
+                    <div class="coin-box pp"><div class="coin-label">Platinum (PP)</div><div class="coin-val" id="val-pp">0</div><input type="number" class="coin-input" id="inp-pp" value="0"></div>
+                    <div class="coin-box gp"><div class="coin-label">Gold (GP)</div><div class="coin-val" id="val-gp">0</div><input type="number" class="coin-input" id="inp-gp" value="0"></div>
+                    <div class="coin-box sp"><div class="coin-label">Silver (SP)</div><div class="coin-val" id="val-sp">0</div><input type="number" class="coin-input" id="inp-sp" value="0"></div>
+                    <div class="coin-box cp"><div class="coin-label">Copper (CP)</div><div class="coin-val" id="val-cp">0</div><input type="number" class="coin-input" id="inp-cp" value="0"></div>
+                </div>
+                <div class="edit-treasury-btns" style="margin-top: 15px; justify-content: center; gap: 10px;">
+                    <button class="btn" id="btn-edit-treasury" style="width:auto;" onclick="startEditTreasury()">Edit Gold</button>
+                    <button class="btn" id="btn-save-treasury" style="display:none; width:auto; background-color:#3ab34a; color:white;" onclick="saveTreasury()">Save Gold</button>
+                    <button class="btn btn-danger" id="btn-cancel-treasury" style="display:none; width:auto; margin-top:0;" onclick="cancelEditTreasury()">Cancel</button>
+                </div>
+            </div>
+
+            <details class="add-details" id="details-loot">
+                <summary>➕ Add Magic Item / Loot</summary>
+                <div class="add-form">
+                    <input type="text" id="loot-name" placeholder="Item Name (e.g. Belt of Dwarvenkind)" style="width: 100%;">
+                    <div style="width: 100%; margin-bottom: 5px;">
+                        <label class="file-upload-label">Who is holding it?</label>
+                        <select id="loot-holder-id" style="width: 100%;">
+                            <option value="">-- Group Stash / Unassigned --</option>
+                        </select>
+                    </div>
+                    <textarea id="loot-desc" placeholder="Properties, magic effects, damage bonuses..." style="height: 80px; width: 100%;"></textarea>
+                    <div style="width: 100%;"><label class="file-upload-label">Upload Image:</label><input type="file" id="loot-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;"></div>
+                    <button class="btn" style="width:100%;" onclick="addEntity('loot')">Save Item</button>
+                </div>
+            </details>
+            
+            <h3 style="font-family:'Cinzel', serif; color:var(--primary-color); border-bottom:1px solid #444; padding-bottom:5px;">Magic Items & Gear</h3>
+            <div class="grid-container" id="loot-grid"></div>
+        </div>
     </main>
 
     <div id="login-modal" style="display:none; position:fixed; z-index:10005; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; backdrop-filter:blur(5px);">
@@ -471,6 +453,10 @@
         let isProtocolBookOpen = false;
         let activeProtocolId = null;
         let allProtocols = [];
+
+        let bastionMap = null;
+        let activeBastionId = null;
+        let bastionImageOverlay = null;
 
         async function checkAuth() {
             const res = await fetch('/api/auth_status');
@@ -539,6 +525,7 @@
                 btn.style.backgroundColor = '#555';
                 btn.style.color = 'white';
                 document.querySelectorAll('.add-details').forEach(el => el.removeAttribute('open'));
+                cancelEditTreasury();
             }
             
             if (typeof map !== 'undefined') {
@@ -550,6 +537,7 @@
                 });
             }
             if(isQuestbookOpen) renderQuestBook();
+            if(activeBastionId) loadBastionTokens();
         }
 
         function switchTab(tabId, btnElement) {
@@ -558,6 +546,7 @@
             document.getElementById(tabId).classList.add('active');
             btnElement.classList.add('active');
             if(tabId === 'map-section') setTimeout(() => { map.invalidateSize(); }, 100);
+            if(tabId === 'bastion-section' && bastionMap) setTimeout(() => { bastionMap.invalidateSize(); }, 100);
         }
 
         function openLightbox(src, title, desc) {
@@ -568,6 +557,7 @@
         }
         function closeLightbox() { document.getElementById('lightbox-modal').style.display = 'none'; }
 
+        // --- MAP CONFIG ---
         const map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2 });
         const bounds = [[-1000, 0], [0, 800]]; 
         L.imageOverlay('https://media.wizards.com/2015/images/dnd/resources/Sword-Coast-Map_HighRes.jpg', bounds).addTo(map);
@@ -687,13 +677,16 @@
             loadPins();
         }
 
+        // --- PROTOCOL BUCH LOGIK (SAUBER HOISTED) ---
         function renderProtocolBook() {
             const gridEl = document.getElementById('protocols-grid');
             
             if(!isProtocolBookOpen) {
                 gridEl.innerHTML = `
                     <div class="quest-book-wrapper">
-                        <div class="protocol-cover" onclick="isProtocolBookOpen=true; renderProtocolBook();">
+                        <div class="protocol-cover" onclick="isProtocolBookOpen=true; renderProtocolBook();" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+                            <h2 style="font-family:'Cinzel', serif; font-size:32px; margin-bottom:10px; text-shadow: 2px 2px 5px #000; color:#cda434;">Council<br>Protocol</h2>
+                            <p style="margin-top:40px; font-size:12px; opacity:0.8; font-family:sans-serif; text-transform:uppercase; letter-spacing:2px; color:#cda434; text-shadow: 1px 1px 3px #000;">(Click to Open)</p>
                         </div>
                     </div>
                 `;
@@ -721,7 +714,7 @@
 
             let options = allProtocols.map(p => `<option value="${p.id}" ${p.id == activeProtocolId ? 'selected' : ''}>${p.name}</option>`).join('');
             let activeProtocol = allProtocols.find(p => p.id == activeProtocolId);
-            const escapedName = activeProtocol.name.replace(/'/g, "\\'");
+            const escapedName = (activeProtocol.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
 
             let contentHtml = `
                 <div style="display:flex; gap:10px; margin-bottom:20px; align-items:center; border-bottom: 2px solid #8b5a2b; padding-bottom: 10px;">
@@ -756,7 +749,137 @@
             `;
         }
 
+        // --- BASTION TACTICAL MAPS ---
+        function openTacticalMap(id, imageUrl, name) {
+            activeBastionId = id;
+            document.getElementById('bastion-list-view').style.display = 'none';
+            document.getElementById('bastion-map-view').style.display = 'flex';
+            document.getElementById('bastion-map-title').innerText = name;
 
+            if (!bastionMap) {
+                bastionMap = L.map('bastion-map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 3 });
+                bastionMap.on('contextmenu', function(e) {
+                    if (authRole === 'none') return; 
+                    
+                    const y = e.latlng.lat, x = e.latlng.lng;
+                    const formHtml = `
+                        <div class="popup-custom" style="color:white; padding:5px;">
+                            <h4 style="margin:0 0 8px 0; font-family:'Cinzel',serif; color:var(--primary-color);">Place Token</h4>
+                            <input type="text" id="token-label" placeholder="Label (e.g. Guard 1)" style="width:100%; padding:5px; margin-bottom:8px; background:#000; color:white; border:1px solid #444;"><br>
+                            <select id="token-type" style="width:100%; padding:5px; margin-bottom:10px; background:#000; color:white; border:1px solid #444;">
+                                <option value="enemy">🔴 Enemy / Monster</option>
+                                <option value="player">🟢 Player / Ally</option>
+                                <option value="cannon">💣 Cannon</option>
+                                <option value="crate">📦 Crate</option>
+                                <option value="barrel">🛢️ Barrel</option>
+                                <option value="trap">⚠️ Trap</option>
+                            </select><br>
+                            <button class="btn" style="width:100%;" onclick="saveBastionToken(${y}, ${x})">Add Token</button>
+                        </div>
+                    `;
+                    L.popup().setLatLng([y, x]).setContent(formHtml).openOn(bastionMap);
+                });
+            }
+
+            if (bastionImageOverlay) { bastionMap.removeLayer(bastionImageOverlay); }
+            const mapBounds = [[-1000, 0], [0, 1000]];
+            bastionImageOverlay = L.imageOverlay(imageUrl, mapBounds).addTo(bastionMap);
+            bastionMap.fitBounds(mapBounds);
+            loadBastionTokens();
+        }
+
+        function closeTacticalMap() {
+            document.getElementById('bastion-list-view').style.display = 'block';
+            document.getElementById('bastion-map-view').style.display = 'none';
+            activeBastionId = null;
+        }
+
+        async function saveBastionToken(y, x) {
+            const label = document.getElementById('token-label').value || 'Token';
+            const iconType = document.getElementById('token-type').value;
+            const formData = new FormData();
+            formData.append('y', y); formData.append('x', x); formData.append('label', label); formData.append('icon_type', iconType);
+
+            await fetch(`/api/bastion/${activeBastionId}/tokens`, { method: 'POST', body: formData });
+            bastionMap.closePopup();
+            loadBastionTokens();
+        }
+
+        async function loadBastionTokens() {
+            if (!activeBastionId) return;
+            const res = await fetch(`/api/bastion/${activeBastionId}/tokens`);
+            const tokens = await res.json();
+
+            bastionMap.eachLayer(layer => { if (layer instanceof L.Marker) { bastionMap.removeLayer(layer); }});
+
+            const emojiMap = { enemy: '🔴', player: '🟢', cannon: '💣', crate: '📦', barrel: '🛢️', trap: '⚠️' };
+
+            tokens.forEach(token => {
+                const iconHtml = `<div style="font-size:24px; text-shadow: 2px 2px 4px #000; text-align:center;">${emojiMap[token.icon_type] || '❓'}</div>`;
+                const tokenIcon = L.divIcon({ html: iconHtml, className: 'custom-token-icon', iconSize: [30, 30], iconAnchor: [15, 15] });
+
+                const content = `
+                    <div class="popup-custom" style="text-align:center; color:white;">
+                        <h4 style="margin:0 0 5px 0; font-family:'Cinzel',serif; color:var(--primary-color);">${token.label}</h4>
+                        <p style="margin:0 0 10px 0; font-size:11px; color:#aaa;">Type: ${token.icon_type}</p>
+                        ${authRole !== 'none' ? `<button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="deleteBastionToken(${token.id})">Remove</button>` : ''}
+                    </div>
+                `;
+
+                const marker = L.marker([token.y, token.x], { icon: tokenIcon, draggable: (authRole !== 'none') }).addTo(bastionMap).bindPopup(content);
+
+                marker.on('dragend', async function(e) {
+                    const newPos = e.target.getLatLng();
+                    await fetch(`/api/bastion/tokens/${token.id}`, {
+                        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({y: newPos.lat, x: newPos.lng})
+                    });
+                    loadBastionTokens();
+                });
+            });
+        }
+
+        async function deleteBastionToken(id) {
+            await fetch(`/api/bastion/tokens/${id}`, { method: 'DELETE' });
+            loadBastionTokens();
+        }
+
+        // --- TREASURY & LOOT ---
+        async function loadTreasury() {
+            const res = await fetch('/api/treasury');
+            const t = await res.json();
+            document.getElementById('val-pp').innerText = t.platinum; document.getElementById('inp-pp').value = t.platinum;
+            document.getElementById('val-gp').innerText = t.gold; document.getElementById('inp-gp').value = t.gold;
+            document.getElementById('val-sp').innerText = t.silver; document.getElementById('inp-sp').value = t.silver;
+            document.getElementById('val-cp').innerText = t.copper; document.getElementById('inp-cp').value = t.copper;
+        }
+
+        function startEditTreasury() {
+            document.getElementById('treasury-board').classList.add('treasury-edit-mode');
+            document.getElementById('btn-edit-treasury').style.display = 'none';
+            document.getElementById('btn-save-treasury').style.display = 'inline-block';
+            document.getElementById('btn-cancel-treasury').style.display = 'inline-block';
+        }
+
+        function cancelEditTreasury() {
+            document.getElementById('treasury-board').classList.remove('treasury-edit-mode');
+            document.getElementById('btn-edit-treasury').style.display = 'inline-block';
+            document.getElementById('btn-save-treasury').style.display = 'none';
+            document.getElementById('btn-cancel-treasury').style.display = 'none';
+            loadTreasury(); 
+        }
+
+        async function saveTreasury() {
+            const data = {
+                platinum: document.getElementById('inp-pp').value,
+                gold: document.getElementById('inp-gp').value,
+                silver: document.getElementById('inp-sp').value,
+                copper: document.getElementById('inp-cp').value
+            };
+            await fetch('/api/treasury', { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+            cancelEditTreasury();
+        }
+
+        // --- ENTITIES (LOAD, EDIT, SAVE, ADD, DELETE) ---
         async function loadEntities(type) {
             const res = await fetch('/api/' + type);
             const data = await res.json();
@@ -769,16 +892,24 @@
             
             if (type === 'chars') {
                 charactersData = data; 
-                const spellSelect = document.getElementById('spell-char-select');
-                const questCharSelect = document.getElementById('quest-char-id');
-                const spellCurrentVal = spellSelect.value;
-                const questCurrentVal = questCharSelect.value;
                 
-                let opts = '<option value="">-- Select a Character --</option>';
-                data.forEach(char => { opts += `<option value="${char.id}" data-pwd="${char.has_password}" data-sbimg="${char.spellbook_image || ''}">${char.name}</option>`; });
-                
-                spellSelect.innerHTML = opts; spellSelect.value = spellCurrentVal;
-                questCharSelect.innerHTML = opts; questCharSelect.value = questCurrentVal;
+                // Update dropdowns
+                const selects = ['spell-char-select', 'quest-char-id', 'loot-holder-id'];
+                selects.forEach(selId => {
+                    const el = document.getElementById(selId);
+                    if(el) {
+                        const currentVal = el.value;
+                        let opts = '';
+                        if(selId === 'loot-holder-id') opts = '<option value="">-- Group Stash / Unassigned --</option>';
+                        else opts = '<option value="">-- Select a Character --</option>';
+                        
+                        data.forEach(char => { 
+                            opts += `<option value="${char.id}" data-pwd="${char.has_password}" data-sbimg="${char.spellbook_image || ''}">${char.name}</option>`; 
+                        });
+                        el.innerHTML = opts; 
+                        el.value = currentVal;
+                    }
+                });
             }
 
             const container = document.getElementById(type + '-grid');
@@ -801,7 +932,7 @@
                                     </div>
                                 </summary>
                                 <div class="dnd-sheet-full">
-                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${item.name.replace(/'/g, "\\'")}', 'Character Portrait')">` : ''}
+                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${(item.name||'').replace(/'/g, "&apos;")}', 'Character Portrait')">` : ''}
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                         <div class="dnd-stat-box"><div class="dnd-stat-label">Background</div><div class="dnd-stat-value" id="chars-bg-${item.id}">${item.background || '-'}</div></div>
                                         <div class="dnd-stat-box"><div class="dnd-stat-label">Age</div><div class="dnd-stat-value" id="chars-age-${item.id}">${item.age || '-'}</div></div>
@@ -830,7 +961,7 @@
                                     </div>
                                 </summary>
                                 <div class="dnd-sheet-full">
-                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${item.name.replace(/'/g, "\\'")}', 'Dragon Bestiary')">` : ''}
+                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${(item.name||'').replace(/'/g, "&apos;")}', 'Dragon Bestiary')">` : ''}
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Physiology</div><div class="dnd-stat-value" id="dragons-phys-${item.id}">${item.physiology || '-'}</div></div>
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Abilities</div><div class="dnd-stat-value" id="dragons-abil-${item.id}">${item.abilities || '-'}</div></div>
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Behavior</div><div class="dnd-stat-value" id="dragons-behav-${item.id}">${item.behavior || '-'}</div></div>
@@ -862,7 +993,7 @@
                                     </div>
                                 </summary>
                                 <div class="dnd-sheet-full">
-                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${item.name.replace(/'/g, "\\'")}', 'NPC Portrait')">` : ''}
+                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${(item.name||'').replace(/'/g, "&apos;")}', 'NPC Portrait')">` : ''}
                                     <div class="dnd-stat-box" style="border-left: 3px solid ${repColor};">
                                         <div class="dnd-stat-label">Exact Relationship (${repVal}/100)</div>
                                         <div class="rep-container" data-val="${repVal}"><div class="rep-bar" style="width: ${repVal}%; background-color: ${repColor};"></div></div>
@@ -893,7 +1024,7 @@
                                     </div>
                                 </summary>
                                 <div class="dnd-sheet-full">
-                                    ${item.image ? `<img src="${item.image}" alt="Wappen" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${item.name.replace(/'/g, "\\'")}', 'Faction Crest')">` : ''}
+                                    ${item.image ? `<img src="${item.image}" alt="Wappen" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${(item.name||'').replace(/'/g, "&apos;")}', 'Faction Crest')">` : ''}
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Leader</div><div class="dnd-stat-value" id="factions-leader-${item.id}">${item.leader || '-'}</div></div>
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Goal</div><div class="dnd-stat-value" id="factions-goal-${item.id}">${item.goal || '-'}</div></div>
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Known for</div><div class="dnd-stat-value" id="factions-known-${item.id}">${item.known_for || '-'}</div></div>
@@ -905,10 +1036,27 @@
                                 </div>
                             </details>
                         </div>`;
-                } else if (type === 'gallery' || type === 'bastion') {
+                } else if (type === 'bastion') {
                     const fallbackImg = `<div style="height:250px; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:#888; border-bottom: 2px solid var(--primary-color);">No Image</div>`;
-                    const escapedDesc = (item.description || '').replace(/'/g, "\\'").replace(/\n/g, " ");
-                    const escapedName = item.name.replace(/'/g, "\\'");
+                    const escapedDesc = (item.description || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                    const escapedName = (item.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                    container.innerHTML += `
+                        <div class="card" id="${type}-${item.id}">
+                            ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width:100%; height:200px; object-fit:cover; border-bottom:1px solid #444;">` : fallbackImg}
+                            <div class="card-content">
+                                <h3 id="${type}-name-${item.id}" style="font-size:16px; margin-bottom:5px;">${item.name}</h3>
+                                <p id="${type}-desc-${item.id}" style="font-size:13px; color:#aaa; max-height:60px; overflow:hidden; text-overflow:ellipsis;">${item.description || '-'}</p>
+                                <button class="btn" style="margin-top:10px; width:100%; background-color:#3ab34a; color:white;" onclick="openTacticalMap(${item.id}, '${(item.image||'').replace(/'/g, "&apos;")}', '${escapedName}')">🗺️ Open Tactical Map</button>
+                                <div class="action-buttons" style="margin-top: 10px; display: flex; gap: 10px;">
+                                    <button class="btn" style="background-color: #555; color: white; padding: 3px 5px; font-size:12px;" onclick="editEntity('${type}', ${item.id})">Edit</button>
+                                    <button class="btn btn-danger" style="margin-top: 0; padding: 3px 5px; font-size:12px;" onclick="deleteEntity('${type}', ${item.id})">Delete</button>
+                                </div>
+                            </div>
+                        </div>`;
+                } else if (type === 'gallery') {
+                    const fallbackImg = `<div style="height:250px; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:#888; border-bottom: 2px solid var(--primary-color);">No Image</div>`;
+                    const escapedDesc = (item.description || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                    const escapedName = (item.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                     container.innerHTML += `
                         <div class="card" id="${type}-${item.id}">
                             ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width:100%; height:200px; object-fit:cover; cursor:pointer; border-bottom:1px solid #444;" onclick="openLightbox('${item.image}', '${escapedName}', '${escapedDesc}')">` : fallbackImg}
@@ -918,6 +1066,37 @@
                                 <div class="action-buttons" style="margin-top: 10px; display: flex; gap: 10px;">
                                     <button class="btn" style="background-color: #555; color: white; padding: 3px 5px; font-size:12px;" onclick="editEntity('${type}', ${item.id})">Edit</button>
                                     <button class="btn btn-danger" style="margin-top: 0; padding: 3px 5px; font-size:12px;" onclick="deleteEntity('${type}', ${item.id})">Delete</button>
+                                </div>
+                            </div>
+                        </div>`;
+                } else if (type === 'loot') {
+                    const fallbackImg = `<div style="height:150px; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:#888; border-bottom: 1px solid var(--primary-color);">No Image</div>`;
+                    const escapedDesc = (item.description || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                    const escapedName = (item.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                    
+                    let holderName = "Group Stash / Unassigned";
+                    let holderClass = "color:#aaa; border:1px solid #aaa;";
+                    
+                    if (item.holder_id) {
+                        const holder = charactersData.find(c => c.id === item.holder_id);
+                        if (holder) {
+                            holderName = "Equipped by: " + holder.name;
+                            holderClass = "background:var(--primary-color); color:#000; border:1px solid var(--primary-color);";
+                        }
+                    }
+
+                    container.innerHTML += `
+                        <div class="card" id="loot-${item.id}">
+                            ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width:100%; height:150px; object-fit:contain; background:#111; border-bottom:1px solid #444; cursor:pointer;" onclick="openLightbox('${item.image}', '${escapedName}', '${escapedDesc}')">` : fallbackImg}
+                            <div class="card-content">
+                                <div class="loot-holder-badge" style="${holderClass}">${holderName}</div>
+                                <h3 id="loot-name-${item.id}" style="font-size:16px; margin:0 0 5px 0;">${item.name}</h3>
+                                <p id="loot-desc-${item.id}" style="font-size:13px; color:#ddd; white-space:pre-wrap;">${item.description || '-'}</p>
+                                <span id="loot-holder-${item.id}" style="display:none;" data-id="${item.holder_id || ''}"></span>
+                                
+                                <div class="action-buttons" style="margin-top: 15px; display: flex; gap: 10px;">
+                                    <button class="btn" style="background-color: #555; color: white; padding: 3px 5px; font-size:12px;" onclick="editEntity('loot', ${item.id})">Edit</button>
+                                    <button class="btn btn-danger" style="margin-top: 0; padding: 3px 5px; font-size:12px;" onclick="deleteEntity('loot', ${item.id})">Delete</button>
                                 </div>
                             </div>
                         </div>`;
@@ -970,26 +1149,41 @@
                     <textarea id="factions-edit-known-${id}" placeholder="Known for" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${knownEl ? knownEl.innerText : ''}</textarea>
                 `;
             } else if (type === 'dragons') {
-                const physEl = document.getElementById(`dragons-phys-${id}`);
-                const abilEl = document.getElementById(`dragons-abil-${id}`);
-                const behavEl = document.getElementById(`dragons-behav-${id}`);
-                const habEl = document.getElementById(`dragons-hab-${id}`);
+                const physEl = document.getElementById('dragons-phys-' + id);
+                const abilEl = document.getElementById('dragons-abil-' + id);
+                const behavEl = document.getElementById('dragons-behav-' + id);
+                const habEl = document.getElementById('dragons-hab-' + id);
                 extraFieldsHTML = `
                     <textarea id="dragons-edit-phys-${id}" placeholder="Physiology" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${physEl ? physEl.innerText : ''}</textarea>
                     <textarea id="dragons-edit-abil-${id}" placeholder="Abilities" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${abilEl ? abilEl.innerText : ''}</textarea>
                     <textarea id="dragons-edit-behav-${id}" placeholder="Behavior" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${behavEl ? behavEl.innerText : ''}</textarea>
                     <textarea id="dragons-edit-hab-${id}" placeholder="Habitat" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${habEl ? habEl.innerText : ''}</textarea>
                 `;
+            } else if (type === 'loot') {
+                const holderEl = document.getElementById(`loot-holder-${id}`);
+                const currentHolder = holderEl ? holderEl.getAttribute('data-id') : '';
+                
+                let opts = '<option value="">-- Group Stash / Unassigned --</option>';
+                charactersData.forEach(c => {
+                    opts += `<option value="${c.id}" ${currentHolder == c.id ? 'selected' : ''}>${c.name}</option>`;
+                });
+                
+                extraFieldsHTML = `
+                    <label class="file-upload-label" style="margin-bottom: 5px;">Who is holding it?</label>
+                    <select id="loot-edit-holder-${id}" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+                        ${opts}
+                    </select>
+                `;
             }
 
             const container = (type === 'protocols') ? document.getElementById(`protocol-page-${id}`) :
-                              (type === 'chars' || type === 'dragons' || type === 'npcs' || type === 'factions') ? document.querySelector(`#${type}-${id} .dnd-sheet-full`) : 
+                              (type === 'chars' || type === 'dragons' || type === 'npcs' || type === 'factions' || type === 'bastion') ? document.querySelector(`#${type}-${id} .dnd-sheet-full`) : 
                               document.querySelector(`#${type}-${id} .card-content`);
             
             container.innerHTML = `
                 <input type="text" id="${type}-edit-name-${id}" value="${currentName}" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; font-family: 'Cinzel', serif; margin-bottom: 10px; box-sizing: border-box;">
                 ${extraFieldsHTML}
-                <label class="file-upload-label" style="margin-bottom: 5px;">New Image/Handout (optional):</label>
+                <label class="file-upload-label" style="margin-bottom: 5px;">New Image (optional):</label>
                 <input type="file" id="${type}-edit-image-${id}" accept="image/*" style="width: 100%; margin-bottom: 10px; color: #fff; box-sizing: border-box;">
                 <textarea id="${type}-edit-desc-${id}" placeholder="Description / History / Notes" style="width: 100%; height: 120px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; font-family: inherit; margin-bottom: 10px; white-space: pre-wrap; box-sizing: border-box;">${currentDesc}</textarea>
                 <div class="action-buttons" style="display: flex; gap: 10px;">
@@ -1008,10 +1202,8 @@
                 formData.append('background', document.getElementById(`chars-edit-bg-${id}`).value);
                 formData.append('age', document.getElementById(`chars-edit-age-${id}`).value);
                 formData.append('appearance', document.getElementById(`chars-edit-app-${id}`).value);
-                
                 const pwdInput = document.getElementById(`chars-edit-password-${id}`);
                 if (pwdInput && pwdInput.value) formData.append('char_password', pwdInput.value);
-
                 const sbInput = document.getElementById(`chars-edit-spellbook_image-${id}`);
                 if (sbInput && sbInput.files.length > 0) formData.append('spellbook_image', sbInput.files[0]);
             } else if (type === 'npcs') {
@@ -1028,6 +1220,8 @@
                 formData.append('abilities', document.getElementById(`dragons-edit-abil-${id}`).value);
                 formData.append('behavior', document.getElementById(`dragons-edit-behav-${id}`).value);
                 formData.append('habitat', document.getElementById(`dragons-edit-hab-${id}`).value);
+            } else if (type === 'loot') {
+                formData.append('holder_id', document.getElementById(`loot-edit-holder-${id}`).value);
             }
             
             const fileInput = document.getElementById(`${type}-edit-image-${id}`);
@@ -1045,6 +1239,7 @@
             if (type === 'dragons') prefix = 'dragon';
             if (type === 'bastion') prefix = 'bastion';
             if (type === 'protocols') prefix = 'protocol';
+            if (type === 'loot') prefix = 'loot';
 
             const name = document.getElementById(`${prefix}-name`).value;
             if(!name) return alert("Title/Name cannot be empty!");
@@ -1057,10 +1252,8 @@
                 formData.append('background', document.getElementById(`${prefix}-bg`).value);
                 formData.append('age', document.getElementById(`${prefix}-age`).value);
                 formData.append('appearance', document.getElementById(`${prefix}-app`).value);
-                
                 const pwdInput = document.getElementById(`${prefix}-password`);
                 if(pwdInput) formData.append('char_password', pwdInput.value);
-
                 const sbInput = document.getElementById(`${prefix}-spellbook_image`);
                 if(sbInput && sbInput.files.length > 0) formData.append('spellbook_image', sbInput.files[0]);
             } else if (type === 'npcs') {
@@ -1077,6 +1270,8 @@
                 formData.append('abilities', document.getElementById(`${prefix}-abilities`).value);
                 formData.append('behavior', document.getElementById(`${prefix}-behavior`).value);
                 formData.append('habitat', document.getElementById(`${prefix}-habitat`).value);
+            } else if (type === 'loot') {
+                formData.append('holder_id', document.getElementById(`loot-holder-id`).value);
             }
             
             const fileInput = document.getElementById(`${prefix}-image`);
@@ -1095,27 +1290,13 @@
                     document.getElementById(`${prefix}-app`).value = '';
                     document.getElementById(`${prefix}-password`).value = '';
                     if(document.getElementById(`${prefix}-spellbook_image`)) document.getElementById(`${prefix}-spellbook_image`).value = '';
-                } else if (type === 'npcs') {
-                    document.getElementById(`npc-rep`).value = 50;
-                    document.getElementById(`${prefix}-appearance`).value = '';
-                    document.getElementById(`${prefix}-faction_alignment`).value = '';
-                    document.getElementById(`${prefix}-special`).value = '';
-                } else if (type === 'factions') {
-                    document.getElementById(`${prefix}-leader`).value = '';
-                    document.getElementById(`${prefix}-goal`).value = '';
-                    document.getElementById(`${prefix}-known_for`).value = '';
-                } else if (type === 'dragons') {
-                    document.getElementById(`${prefix}-physiology`).value = '';
-                    document.getElementById(`${prefix}-abilities`).value = '';
-                    document.getElementById(`${prefix}-behavior`).value = '';
-                    document.getElementById(`${prefix}-habitat`).value = '';
+                } else if (type === 'loot') {
+                    document.getElementById(`loot-holder-id`).value = '';
                 }
                 
                 document.getElementById(`details-${type}`).removeAttribute('open');
                 
-                if (type === 'protocols') {
-                    isProtocolBookOpen = true; 
-                }
+                if (type === 'protocols') { isProtocolBookOpen = true; }
                 
                 loadEntities(type);
             } else {
@@ -1129,6 +1310,7 @@
             else { loadEntities(type); }
         }
 
+        // --- SPELL FUNCTIONS ---
         function onCharacterSelectChange() {
             isSpellbookOpen = false;
             activeSpellId = null;
@@ -1438,6 +1620,8 @@
                 gridEl.innerHTML = `
                     <div class="quest-book-wrapper">
                         <div class="quest-cover" onclick="isQuestbookOpen=true; renderQuestBook();">
+                            <h2 style="font-family:'Cinzel', serif; font-size:32px; margin-bottom:10px; text-shadow: 2px 2px 5px #000;">Adventure<br>Logbook</h2>
+                            <p style="margin-top:40px; font-size:12px; opacity:0.6; font-family:sans-serif; text-transform:uppercase; letter-spacing:2px;">(Click to Open)</p>
                         </div>
                     </div>
                 `;
@@ -1611,6 +1795,8 @@
         loadEntities('gallery');
         loadEntities('bastion');
         loadEntities('protocols');
+        loadEntities('loot'); 
+        loadTreasury();       
         loadQuests();
 
     </script>
