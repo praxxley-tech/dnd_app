@@ -170,10 +170,10 @@ def login():
     u = data.get('username')
     p = data.get('password')
     
-    if u == 'admin' and p == 'jonas':
+    if u == '' and p == '':
         session['role'] = 'admin'
         return jsonify({"success": True, "role": "admin"})
-    elif u == 'Tyranny' and p == 'Tyranny':
+    elif u == '' and p == '':
         session['role'] = 'editor'
         return jsonify({"success": True, "role": "editor"})
         
