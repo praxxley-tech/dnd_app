@@ -172,6 +172,8 @@
         .quest-item.completed h4 { color: #2b6e3b; text-decoration: line-through; opacity: 0.7;}
         .quest-item p { margin: 0; font-family: 'Lora', serif; font-size: 14px; line-height: 1.5; white-space: pre-wrap; font-weight: bold;}
         .char-quest-header { font-family: 'Cinzel', serif; font-weight: bold; background: rgba(139, 90, 43, 0.2); padding: 5px 10px; margin: 15px 0 10px 0; color: #5c3a21; border-left: 4px solid #8b5a2b; }
+        .locked-quest-btn { background: #8b2b2b; color: white; border: none; padding: 8px 10px; border-radius: 3px; cursor: pointer; font-family: 'Lora', serif; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); width: 100%; justify-content: center; font-weight: bold;}
+        .locked-quest-btn:hover { background: #a53232; }
         .quest-nav-container { position: absolute; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; box-sizing: border-box; }
         .quest-nav-btn { background: #5c3a21; color: #fdf5e6; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; font-size: 14px; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
         .quest-nav-btn:hover { background: #8b5a2b; }
@@ -433,7 +435,6 @@
 
     </main>
 
-    <!-- Login Modal -->
     <div id="login-modal" style="display:none; position:fixed; z-index:10005; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; backdrop-filter:blur(5px);">
         <div style="background:var(--card-bg); padding:25px; border:2px solid var(--primary-color); border-radius:8px; width:300px; text-align:center;">
             <h3 style="font-family:'Cinzel', serif; color:var(--primary-color); margin-top:0;">DM Login</h3>
@@ -445,7 +446,6 @@
         </div>
     </div>
 
-    <!-- Lightbox -->
     <div id="lightbox-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.92); align-items:center; justify-content:center; cursor:zoom-out; flex-direction:column; backdrop-filter:blur(5px);" onclick="closeLightbox()">
         <span style="position:absolute; top:15px; right:25px; color:#fff; font-size:40px; font-weight:bold; cursor:pointer; font-family:sans-serif;">&times;</span>
         <img id="lightbox-img" src="" style="max-width:90%; max-height:80%; object-fit:contain; border:2px solid var(--primary-color); border-radius:4px; box-shadow:0 0 20px rgba(0,0,0,0.8);">
@@ -466,7 +466,7 @@
         let currentQuestPage = 'group'; 
         let allQuests = [];
         let charactersData = [];
-        let unlockedCharId = null; // Speichert den aktuell entsperrten Charakter für Geheimnisse
+        let unlockedCharId = null; 
 
         let isProtocolBookOpen = false;
         let activeProtocolId = null;
@@ -734,8 +734,9 @@
                 
                 <div id="protocol-page-${activeProtocol.id}">
                     ${activeProtocol.image ? `<img src="${activeProtocol.image}" alt="Handout" style="width:100%; max-height:300px; object-fit:contain; margin-bottom:20px; cursor:pointer; border: 2px solid #8b5a2b; border-radius: 4px; box-shadow: 2px 2px 8px rgba(0,0,0,0.5);" onclick="openLightbox('${activeProtocol.image}', '${escapedName}', 'Protocol / Handout')">` : ''}
-                    <h3 style="font-family:'Cinzel', serif; font-size: 24px; color:#8b2b2b; margin-top:0;">${activeProtocol.name}</h3>
-                    <p style="font-family:'Lora', serif; font-size:15px; line-height:1.6; white-space:pre-wrap; font-weight:bold; color:#2b1b07;">${activeProtocol.description || '-'}</p>
+                    
+                    <h3 id="protocols-name-${activeProtocol.id}" style="font-family:'Cinzel', serif; font-size: 24px; color:#8b2b2b; margin-top:0;">${activeProtocol.name}</h3>
+                    <p id="protocols-desc-${activeProtocol.id}" style="font-family:'Lora', serif; font-size:15px; line-height:1.6; white-space:pre-wrap; font-weight:bold; color:#2b1b07;">${activeProtocol.description || '-'}</p>
                     
                     <div class="action-buttons" style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
                         <button class="btn" style="background-color: #5c3a21; color: white; padding: 5px 15px; font-size:13px; width:auto;" onclick="editEntity('protocols', ${activeProtocol.id})">Edit</button>
@@ -1135,33 +1136,48 @@
         }
 
         async function searchSpellAPI() {
-            let query = document.getElementById('api-search-input').value.toLowerCase().trim().replace(/ /g, '-');
-            if(!query) return alert("Please enter an English spell name (e.g. fireball).");
+            let inputVal = document.getElementById('api-search-input').value;
+            if(!inputVal) return alert("Please enter an English spell name (e.g. fireball).");
+
+            let query = inputVal.toLowerCase().trim().replace(/['’]/g, '').replace(/[\s_]+/g, '-');
 
             try {
                 const res = await fetch(`https://www.dnd5eapi.co/api/spells/${query}`);
                 if(!res.ok) throw new Error("Spell not found.");
                 const data = await res.json();
 
-                document.getElementById('spell-name').value = data.name;
-                document.getElementById('spell-level_school').value = `${data.level === 0 ? 'Cantrip' : data.level + 'nd-level'} ${data.school.name.toLowerCase()}`;
-                document.getElementById('spell-casting_time').value = data.casting_time;
-                document.getElementById('spell-range').value = data.range;
-                document.getElementById('spell-components').value = data.components.join(', ') + (data.material ? ` (${data.material})` : '');
-                document.getElementById('spell-duration').value = data.duration;
+                document.getElementById('spell-name').value = data.name || '';
                 
-                let descText = data.desc.join('\n\n');
-                if (data.higher_level) {
+                let lvlStr = 'Cantrip';
+                if (data.level === 1) lvlStr = '1st-level';
+                else if (data.level === 2) lvlStr = '2nd-level';
+                else if (data.level === 3) lvlStr = '3rd-level';
+                else if (data.level >= 4) lvlStr = data.level + 'th-level';
+
+                let schoolStr = (data.school && data.school.name) ? data.school.name.toLowerCase() : '';
+                document.getElementById('spell-level_school').value = `${lvlStr} ${schoolStr}`.trim();
+                
+                document.getElementById('spell-casting_time').value = data.casting_time || '';
+                document.getElementById('spell-range').value = data.range || '';
+                
+                let comps = data.components ? data.components.join(', ') : '';
+                if(data.material) comps += ` (${data.material})`;
+                document.getElementById('spell-components').value = comps;
+                
+                document.getElementById('spell-duration').value = data.duration || '';
+                
+                let descText = data.desc ? data.desc.join('\n\n') : '';
+                if (data.higher_level && data.higher_level.length > 0) {
                     descText += '\n\nAt Higher Levels: ' + data.higher_level.join('\n');
                 }
                 document.getElementById('spell-description').value = descText;
                 
-                document.getElementById('spell-classes').value = data.classes.map(c => c.name).join(', ');
+                document.getElementById('spell-classes').value = data.classes ? data.classes.map(c => c.name).join(', ') : '';
                 document.getElementById('spell-source').value = "D&D 5e SRD '14";
 
                 alert("Spell '" + data.name + "' loaded successfully!");
             } catch(e) {
-                alert("Spell not found! Please make sure to use the original English SRD name (e.g. 'cure-wounds' or 'fireball').");
+                alert("Spell not found! Please make sure to use the original English SRD name (e.g. 'cure wounds', 'hunters mark' or 'fireball').");
             }
         }
 
@@ -1189,7 +1205,44 @@
             gridEl.innerHTML = '';
             
             if(spells.length === 0) {
-                gridEl.innerHTML = '<p style="text-align:center; width:100%; color:#888;">This spellbook is currently empty.</p>';
+                let html = '';
+                if (!isSpellbookOpen) {
+                    if (sbImg && sbImg !== 'null' && sbImg.trim() !== '') {
+                        html = `
+                            <div class="spellbook-wrapper">
+                                <div class="custom-spellbook-cover" onclick="toggleSpellbook(true)">
+                                    <img src="${sbImg}" alt="Spellbook Cover">
+                                </div>
+                            </div>`;
+                    } else {
+                        html = `
+                            <div class="spellbook-wrapper">
+                                <div class="spellbook-cover" onclick="toggleSpellbook(true)">
+                                    <h2 style="font-family:'Cinzel', serif; font-size:28px; margin-bottom:10px;">Spellbook</h2>
+                                    <p style="font-style:italic; font-family:'Lora', serif; font-size: 16px;">Property of ${charName}</p>
+                                    <p style="margin-top:40px; font-size:12px; opacity:0.6; font-family:sans-serif; text-transform:uppercase; letter-spacing:2px;">(Click to Open)</p>
+                                </div>
+                            </div>`;
+                    }
+                } else {
+                    html = `
+                        <div class="spellbook-wrapper">
+                            <div class="spellbook-pages">
+                                <div style="display:flex; gap:10px; margin-bottom:20px; align-items:center; border-bottom: 1px solid #8b5a2b; padding-bottom: 10px;">
+                                    <span style="font-family:'Cinzel', serif; font-weight:bold; color:#5c3a21;">Bookmark:</span>
+                                    <select id="spell-navigator" disabled style="flex-grow:1; padding:5px; font-family:'Cinzel', serif; background:rgba(0,0,0,0.05); border:1px solid #8b5a2b; color:#5c3a21; font-weight:bold; font-size:16px;">
+                                        <option>-- Empty --</option>
+                                    </select>
+                                    <button class="btn btn-danger" style="margin:0; width:auto; padding:6px 12px; background-color:#8b5a2b;" onclick="toggleSpellbook(false)">✖ Close</button>
+                                </div>
+                                <div style="text-align:center; padding:60px 20px;">
+                                    <h3 style="font-family:'Cinzel', serif; color:#8b2b2b; font-size:24px;">The pages are blank...</h3>
+                                    <p style="font-family:'Lora', serif; font-size:16px; color:#555; font-style:italic;">Use the form above to scribe your first spell into this book.</p>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+                gridEl.innerHTML = html;
                 return;
             }
 
@@ -1198,7 +1251,7 @@
             let html = '';
 
             if (!isSpellbookOpen) {
-                if (sbImg && sbImg !== 'null') {
+                if (sbImg && sbImg !== 'null' && sbImg.trim() !== '') {
                     html = `
                         <div class="spellbook-wrapper">
                             <div class="custom-spellbook-cover" onclick="toggleSpellbook(true)">
@@ -1257,6 +1310,96 @@
         function toggleSpellbook(state) { isSpellbookOpen = state; loadSpells(); }
         function changeActiveSpell(id) { activeSpellId = id; loadSpells(); }
 
+        async function addSpell() {
+            const charId = document.getElementById('spell-char-select').value;
+            const name = document.getElementById('spell-name').value;
+            if(!charId) return alert("Error: No character selected.");
+            if(!name) return alert("Spell name cannot be empty!");
+
+            const formData = new FormData();
+            formData.append('character_id', charId);
+            formData.append('name', name);
+            formData.append('level_school', document.getElementById('spell-level_school').value);
+            formData.append('casting_time', document.getElementById('spell-casting_time').value);
+            formData.append('range', document.getElementById('spell-range').value);
+            formData.append('components', document.getElementById('spell-components').value);
+            formData.append('duration', document.getElementById('spell-duration').value);
+            formData.append('description', document.getElementById('spell-description').value);
+            formData.append('classes', document.getElementById('spell-classes').value);
+            formData.append('source', document.getElementById('spell-source').value);
+
+            const res = await fetch('/api/spells', { method: 'POST', body: formData });
+            if(res.ok) {
+                document.getElementById('spell-name').value = '';
+                document.getElementById('spell-level_school').value = '';
+                document.getElementById('spell-casting_time').value = '';
+                document.getElementById('spell-range').value = '';
+                document.getElementById('spell-components').value = '';
+                document.getElementById('spell-duration').value = '';
+                document.getElementById('spell-description').value = '';
+                document.getElementById('spell-classes').value = '';
+                document.getElementById('spell-source').value = '';
+                document.getElementById('api-search-input').value = '';
+                
+                document.getElementById('details-spells').removeAttribute('open');
+                
+                isSpellbookOpen = true;
+                loadSpells(); 
+            } else {
+                alert("Error saving spell. Are you logged in?");
+            }
+        }
+
+        function editSpell(id) {
+            const nameEl = document.getElementById(`spells-name-${id}`);
+            const sourceEl = document.getElementById(`spells-source-${id}`);
+            const levelEl = document.getElementById(`spells-level_school-${id}`);
+            const castEl = document.getElementById(`spells-casting_time-${id}`);
+            const rangeEl = document.getElementById(`spells-range-${id}`);
+            const compEl = document.getElementById(`spells-components-${id}`);
+            const durEl = document.getElementById(`spells-duration-${id}`);
+            const descEl = document.getElementById(`spells-description-${id}`);
+            const classEl = document.getElementById(`spells-classes-${id}`);
+
+            const container = document.getElementById(`spell-page-${id}`);
+            container.innerHTML = `
+                <input type="text" id="edit-spell-name-${id}" value="${nameEl ? nameEl.innerText : ''}" placeholder="Name" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px; font-weight:bold;">
+                <input type="text" id="edit-spell-source-${id}" value="${sourceEl ? sourceEl.innerText : ''}" placeholder="Source" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-level-${id}" value="${levelEl ? levelEl.innerText : ''}" placeholder="Level & School" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-cast-${id}" value="${castEl ? castEl.innerText : ''}" placeholder="Casting Time" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-range-${id}" value="${rangeEl ? rangeEl.innerText : ''}" placeholder="Range" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-comp-${id}" value="${compEl ? compEl.innerText : ''}" placeholder="Components" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-dur-${id}" value="${durEl ? durEl.innerText : ''}" placeholder="Duration" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <textarea id="edit-spell-desc-${id}" placeholder="Description" style="width: 100%; height: 100px; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">${descEl ? descEl.innerText : ''}</textarea>
+                <input type="text" id="edit-spell-class-${id}" value="${classEl ? classEl.innerText : ''}" placeholder="Classes" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 10px;">
+                <div class="action-buttons" style="display: flex; gap: 10px;">
+                    <button class="btn" style="background-color: #5c3a21; color: white;" onclick="saveSpellEdit(${id})">Save</button>
+                    <button class="btn btn-danger" style="margin-top: 0;" onclick="loadSpells()">Cancel</button>
+                </div>
+            `;
+        }
+
+        async function saveSpellEdit(id) {
+            const formData = new FormData();
+            formData.append('name', document.getElementById(`edit-spell-name-${id}`).value);
+            formData.append('source', document.getElementById(`edit-spell-source-${id}`).value);
+            formData.append('level_school', document.getElementById(`edit-spell-level-${id}`).value);
+            formData.append('casting_time', document.getElementById(`edit-spell-cast-${id}`).value);
+            formData.append('range', document.getElementById(`edit-spell-range-${id}`).value);
+            formData.append('components', document.getElementById(`edit-spell-comp-${id}`).value);
+            formData.append('duration', document.getElementById(`edit-spell-dur-${id}`).value);
+            formData.append('description', document.getElementById(`edit-spell-desc-${id}`).value);
+            formData.append('classes', document.getElementById(`edit-spell-class-${id}`).value);
+            
+            await fetch(`/api/spells/${id}`, { method: 'PUT', body: formData });
+            loadSpells();
+        }
+
+        async function deleteSpell(id) {
+            await fetch(`/api/spells/${id}`, { method: 'DELETE' });
+            loadSpells();
+        }
+
         function toggleQuestCharSelect() {
             const isGroup = document.getElementById('quest-is-group').value === 'true';
             document.getElementById('quest-char-wrapper').style.display = isGroup ? 'none' : 'block';
@@ -1289,15 +1432,12 @@
             }
         }
 
-        // --- QUEST BOOK RENDER ---
         function renderQuestBook() {
             const gridEl = document.getElementById('quests-grid');
             if(!isQuestbookOpen) {
                 gridEl.innerHTML = `
                     <div class="quest-book-wrapper">
                         <div class="quest-cover" onclick="isQuestbookOpen=true; renderQuestBook();">
-                            <h2 style="font-family:'Cinzel', serif; font-size:32px; margin-bottom:10px; text-shadow: 2px 2px 5px #000;">Adventure<br>Logbook</h2>
-                            <p style="margin-top:40px; font-size:12px; opacity:0.6; font-family:sans-serif; text-transform:uppercase; letter-spacing:2px;">(Click to Open)</p>
                         </div>
                     </div>
                 `;
@@ -1338,7 +1478,6 @@
                 let personalHtml = '';
                 
                 if (authRole === 'admin') {
-                    // Admin sieht alle persönlichen Quests sortiert nach Charakter
                     charactersData.forEach(char => {
                         const charQuests = personalQuests.filter(q => q.character_id == char.id);
                         if(charQuests.length > 0) {
@@ -1359,7 +1498,6 @@
                         }
                     });
                 } else {
-                    // Spieler-Ansicht: Muss erst entsperren
                     if (!unlockedCharId) {
                         let charOpts = '<option value="">-- Select Character --</option>';
                         charactersData.forEach(c => {
@@ -1376,7 +1514,6 @@
                             </div>
                         `;
                     } else {
-                        // Spieler hat entsperrt
                         const char = charactersData.find(c => c.id == unlockedCharId);
                         const charQuests = personalQuests.filter(q => q.character_id == unlockedCharId);
                         
@@ -1388,6 +1525,10 @@
                                     <div class="quest-item ${compClass}">
                                         <h4>${q.title}</h4>
                                         <p>${(q.description||'').replace(/\n/g, '<br>')}</p>
+                                        <div style="margin-top:8px; display:flex; gap:5px;">
+                                            ${q.status !== 'completed' ? `<button class="btn" style="background:#2b6e3b; padding:3px 8px; font-size:11px;" onclick="toggleQuestStatus(${q.id}, 'completed')">✔ Complete</button>` : `<button class="btn" style="background:#555; padding:3px 8px; font-size:11px;" onclick="toggleQuestStatus(${q.id}, 'active')">↩ Reactivate</button>`}
+                                            <button class="btn btn-danger" style="margin:0; padding:3px 8px; font-size:11px;" onclick="deleteEntity('quests', ${q.id})">✖ Delete</button>
+                                        </div>
                                     </div>
                                 `;
                             });
