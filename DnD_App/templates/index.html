@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tyranny of Dragons Adventure Log</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --text-color: #e0e0e0;
+            --primary-color: #cda434; 
+            --nav-bg: rgba(17, 17, 17, 0.9); 
+            --card-bg: rgba(35, 35, 35, 0.85); 
+            --danger-color: #b33a3a;
+        }
+
+        body { 
+            margin: 0; 
+            font-family: 'Lora', serif; 
+            color: var(--text-color); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            background-image: linear-gradient(rgba(15, 15, 15, 0.8), rgba(15, 15, 15, 0.8)), url('/static/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        nav { background-color: var(--nav-bg); padding: 15px 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--primary-color); z-index: 1000; backdrop-filter: blur(5px); flex-wrap: wrap;}
+        .nav-brand { display: flex; align-items: center; gap: 15px; margin-right: auto; }
+        .nav-brand img { height: 40px; object-fit: contain; }
+        .nav-brand h1 { margin: 0; font-family: 'Cinzel', serif; color: var(--primary-color); font-size: 20px; text-shadow: 2px 2px 4px #000;}
+        
+        .tab-btn { background: none; border: none; color: var(--text-color); font-family: 'Cinzel', serif; font-size: 15px; cursor: pointer; padding: 5px 8px; transition: color 0.3s; text-shadow: 1px 1px 2px #000; }
+        .tab-btn:hover, .tab-btn.active { color: var(--primary-color); border-bottom: 1px solid var(--primary-color); }
+
+        .section { display: none; flex-grow: 1; padding: 20px; overflow-y: auto; }
+        .section.active { display: block; }
+        #map-section.active { display: flex; padding: 0; overflow: hidden; position: relative; }
+        #map { width: 100%; height: 100%; background-color: #000; }
+
+        .leaflet-popup-content-wrapper { background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--primary-color); border-radius: 8px; width: 280px; backdrop-filter: blur(5px); }
+        .leaflet-popup-tip { background-color: var(--card-bg); }
+        
+        .popup-custom img { width: 100%; max-height: 250px; object-fit: contain; background-color: rgba(0,0,0,0.5); border-radius: 4px; margin-bottom: 10px; }
+        .popup-custom h3 { font-family: 'Cinzel', serif; color: var(--primary-color); margin: 0 0 5px 0; }
+        .popup-custom p { margin: 0 0 10px 0; font-size: 14px; white-space: pre-wrap; }
+        
+        .btn { background-color: var(--primary-color); color: #000; border: none; padding: 5px 10px; cursor: pointer; font-family: 'Cinzel', serif; border-radius: 3px; width: 100%; font-weight: bold; box-sizing: border-box;}
+        .btn-danger { background-color: var(--danger-color); color: white; margin-top: 5px; }
+
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; align-items: start;}
+        
+        .card { background-color: var(--card-bg); border: 1px solid #444; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(3px); }
+        .card-content { padding: 15px; }
+        .card-content h3 { margin: 0 0 10px 0; font-family: 'Cinzel', serif; color: var(--primary-color); }
+        .card-content p { margin: 0; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+        
+        .add-details { margin: 0 auto 20px auto; max-width: 1200px; text-align: center; }
+        .add-details summary { display: inline-block; background-color: var(--primary-color); color: #000; padding: 10px 20px; font-family: 'Cinzel', serif; font-weight: bold; border-radius: 4px; cursor: pointer; list-style: none; transition: background-color 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .add-details summary::-webkit-details-marker { display: none; }
+        .add-details summary:hover { background-color: #e6b800; }
+        
+        .add-form { background-color: var(--card-bg); padding: 15px; border: 1px dashed var(--primary-color); border-radius: 8px; display: flex; gap: 10px; flex-wrap: wrap; backdrop-filter: blur(5px); margin-top: 15px; text-align: left;}
+        .add-form input, .add-form textarea, .add-form select { background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #444; padding: 8px; flex-grow: 1; min-width: 200px; font-family: inherit; box-sizing: border-box;}
+        
+        .map-form input, .map-form textarea { width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #444; padding: 5px; margin-bottom: 5px; box-sizing: border-box;}
+        .file-upload-label { font-size: 12px; color: var(--primary-color); margin-bottom: 2px; display: block; text-shadow: 1px 1px 2px #000; }
+        
+        .route-edit { display: flex; gap: 10px; align-items: center; margin-top: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 4px; border: 1px solid #444;}
+        .route-edit input { width: 40px; text-align: center; background: #000; color: #fff; border: 1px solid var(--primary-color); }
+
+        .char-details { padding: 15px; }
+        .char-details summary { list-style: none; cursor: pointer; outline: none; }
+        .char-details summary::-webkit-details-marker { display: none; }
+        
+        .char-summary-header, .dragon-summary-header, .faction-summary-header { display: flex; align-items: center; gap: 15px; min-height: 95px; padding: 5px 0; }
+        
+        .char-summary-header img { width: 70px; height: 70px; object-fit: cover; border-radius: 50%; border: 2px solid var(--primary-color); background-color: #000; flex-shrink: 0; }
+        .dragon-summary-header img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid var(--primary-color); background-color: #000; flex-shrink: 0; }
+        .faction-summary-header img { width: 70px; height: 70px; object-fit: scale-down; border-radius: 4px; border: 2px solid var(--primary-color); background-color: #000; flex-shrink: 0; }
+
+        .summary-info { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; padding: 5px 0; }
+        .summary-info h3 { margin: 0; font-family: 'Cinzel', serif; color: var(--primary-color); font-size: 18px; line-height: 1.3; word-wrap: break-word; hyphens: auto; }
+        .summary-info p { margin: 6px 0 0 0; font-size: 12px; color: #aaa; font-style: italic; }
+
+        .dnd-sheet-full { margin-top: 15px; border-top: 1px dashed var(--primary-color); padding-top: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .dnd-sheet-full > img { width: 100%; max-height: 350px; object-fit: contain; background: rgba(0,0,0,0.6); border-radius: 4px; border: 1px solid #444;}
+        
+        .dnd-stat-box { background: rgba(10,10,10,0.6); border: 1px solid #444; padding: 10px; border-radius: 4px; border-left: 3px solid var(--primary-color); }
+        .dnd-stat-label { font-size: 10px; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; font-family: 'Cinzel', serif;}
+        .dnd-stat-value { font-size: 14px; white-space: pre-wrap; line-height: 1.4; }
+
+        .rep-container { width: 100%; background: #111; border: 1px solid #444; border-radius: 4px; height: 12px; overflow: hidden; position: relative; }
+        .rep-bar { height: 100%; transition: width 0.4s ease, background-color 0.4s ease; }
+
+        /* Spellbook CSS */
+        .spellbook-wrapper { grid-column: 1 / -1; display: flex; justify-content: center; width: 100%; padding: 20px 0; }
+        .spellbook-cover { background: linear-gradient(135deg, #1f0d35, #42236d); border: 4px solid #cda434; border-radius: 5px 18px 18px 5px; box-shadow: inset 10px 0 30px rgba(0,0,0,0.8), 10px 10px 25px rgba(0,0,0,0.7); color: #cda434; text-align: center; padding: 80px 30px; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; width: 100%; max-width: 350px; user-select: none; }
+        .spellbook-cover:hover { transform: scale(1.03) perspective(500px) rotateY(-5deg); box-shadow: inset 10px 0 30px rgba(0,0,0,0.8), 15px 15px 30px rgba(0,0,0,0.8); }
+        .custom-spellbook-cover { border: none; border-radius: 5px 18px 18px 5px; box-shadow: 10px 10px 25px rgba(0,0,0,0.7); cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; width: 100%; max-width: 350px; overflow: hidden; display: flex; }
+        .custom-spellbook-cover:hover { transform: scale(1.03) perspective(500px) rotateY(-5deg); box-shadow: 15px 15px 30px rgba(0,0,0,0.8); }
+        .custom-spellbook-cover img { width: 100%; height: 400px; object-fit: cover; display: block; }
+        .spellbook-pages { background: #fdf6e3; color: #000; border: 2px solid #8b5a2b; border-radius: 2px 12px 12px 2px; box-shadow: inset 20px 0 25px rgba(0,0,0,0.1), 10px 10px 30px rgba(0,0,0,0.6); padding: 30px; width: 100%; max-width: 650px; position: relative; background-image: linear-gradient(to right, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 6%, rgba(0,0,0,0) 95%, rgba(0,0,0,0.05) 100%); animation: openBookAnim 0.5s ease-out forwards; }
+        @keyframes openBookAnim { 0% { transform: rotateY(-90deg) scale(0.8); opacity: 0; } 100% { transform: rotateY(0) scale(1); opacity: 1; } }
+        .spell-title { font-family: 'Cinzel', serif; font-size: 26px; font-weight: bold; color: #b33a3a; border-bottom: 2px solid #cda434; margin: 0 0 5px 0; }
+        .spell-source { font-size: 11px; font-style: italic; color: #666; text-align: right; margin-top: -25px; margin-bottom: 15px; }
+        .spell-meta { font-style: italic; margin-bottom: 15px; color: #444; font-size: 15px;}
+        .spell-stats { margin: 0 0 15px 0; padding: 0; list-style: none; font-size: 15px; }
+        .spell-stats li { margin-bottom: 4px; }
+        .spell-stats strong { color: #5c3a21; }
+        .spell-desc { font-size: 15px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 15px; color: #222; }
+        .spell-footer { font-size: 13px; color: #555; border-top: 1px dashed #aaa; padding-top: 10px; margin-top: 15px;}
+
+        /* Quest & Protocol Book CSS */
+        .quest-book-wrapper { grid-column: 1 / -1; display: flex; justify-content: center; width: 100%; padding: 20px 0; }
+        
+        .quest-cover { 
+            background-image: url('/static/acc.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            border: 4px solid #cda434; 
+            border-radius: 8px; 
+            box-shadow: 10px 10px 25px rgba(0,0,0,0.8); 
+            cursor: pointer; 
+            transition: transform 0.4s ease, box-shadow 0.4s ease; 
+            width: 100%; 
+            max-width: 400px; 
+            height: 550px; 
+            user-select: none; 
+            position: relative;
+        }
+        .quest-cover:hover { transform: scale(1.02) perspective(600px) rotateY(-5deg); box-shadow: 15px 15px 35px rgba(0,0,0,0.9); }
+        
+        .protocol-cover { 
+            background-image: url('/static/council.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            border: 4px solid #cda434; 
+            border-radius: 8px; 
+            box-shadow: 10px 10px 25px rgba(0,0,0,0.8); 
+            cursor: pointer; 
+            transition: transform 0.4s ease, box-shadow 0.4s ease; 
+            width: 100%; 
+            max-width: 400px; 
+            height: 550px; 
+            user-select: none; 
+            position: relative;
+        }
+        .protocol-cover:hover { transform: scale(1.02) perspective(600px) rotateY(-5deg); box-shadow: 15px 15px 35px rgba(0,0,0,0.9); }
+
+        .quest-pages { display: flex; width: 100%; max-width: 700px; animation: openBookAnim 0.5s ease-out forwards; justify-content: center; }
+        .quest-page { 
+            width: 100%; 
+            background-image: url('/static/image_b0505c.jpg'); 
+            background-size: cover; 
+            background-position: center;
+            color: #2b1b07; 
+            padding: 40px 40px 80px 40px; 
+            min-height: 600px; 
+            position: relative; 
+            border-radius: 4px; 
+            box-shadow: 5px 5px 20px rgba(0,0,0,0.8); 
+        }
+        .quest-page-title { font-family: 'Cinzel', serif; font-size: 28px; color: #5c3a21; text-align: center; border-bottom: 2px solid #8b5a2b; padding-bottom: 10px; margin-top: 0; margin-bottom: 25px; text-transform: uppercase; }
+        .quest-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed #dcb38a; }
+        .quest-item h4 { margin: 0 0 5px 0; font-family: 'Cinzel', serif; font-size: 18px; color: #8b2b2b; }
+        .quest-item.completed h4 { color: #2b6e3b; text-decoration: line-through; opacity: 0.7;}
+        .quest-item p { margin: 0; font-family: 'Lora', serif; font-size: 14px; line-height: 1.5; white-space: pre-wrap; font-weight: bold;}
+        .char-quest-header { font-family: 'Cinzel', serif; font-weight: bold; background: rgba(139, 90, 43, 0.2); padding: 5px 10px; margin: 15px 0 10px 0; color: #5c3a21; border-left: 4px solid #8b5a2b; }
+        .quest-nav-container { position: absolute; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; box-sizing: border-box; }
+        .quest-nav-btn { background: #5c3a21; color: #fdf5e6; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; font-size: 14px; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
+        .quest-nav-btn:hover { background: #8b5a2b; }
+
+        .action-buttons, .route-edit, .add-details { display: none !important; }
+        body.edit-mode .action-buttons, body.edit-mode .route-edit { display: flex !important; }
+        body.edit-mode .add-details { display: block !important; }
+        .api-search-box { background: rgba(139, 90, 43, 0.2); border: 1px solid var(--primary-color); border-radius: 4px; padding: 10px; width: 100%; display: flex; gap: 10px; margin-bottom: 15px; box-sizing: border-box; align-items: center; }
+
+        @media (max-width: 900px) {
+            .quest-pages { flex-direction: column; }
+            .quest-page.left { border-radius: 4px 4px 0 0; border-right: none; border-bottom: 2px solid #8b5a2b; box-shadow: inset 0 -15px 20px rgba(0,0,0,0.1); }
+            .quest-page.right { border-radius: 0 0 4px 4px; border-left: none; box-shadow: inset 0 15px 20px rgba(0,0,0,0.1); }
+        }
+        @media (max-width: 768px) {
+            .nav-brand { width: 100%; justify-content: center; margin-right: 0; margin-bottom: 5px; }
+            .nav-brand h1 { font-size: 20px; }
+            .tab-btn { font-size: 13px; padding: 8px 4px; flex-grow: 1; border-bottom: 1px solid transparent; }
+            .add-form { flex-direction: column; align-items: stretch; }
+            .add-form > div { width: 100%; }
+            .add-form button { width: 100% !important; }
+            .leaflet-popup-content-wrapper { width: 240px; }
+            .api-search-box { flex-direction: column; align-items: stretch; }
+            .spellbook-pages { padding: 15px; }
+            .quest-page { padding: 30px 20px 80px 20px; }
+            .quest-nav-container { padding: 0 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-brand">
+            <img src="/static/logo.jpg" alt="Tyranny of Dragons">
+            <h1>Tyranny of Dragons</h1>
+        </div>
+        
+        <button class="tab-btn active" onclick="switchTab('map-section', this)">World Map</button>
+        <button class="tab-btn" onclick="switchTab('chars-section', this)">Characters</button>
+        <button class="tab-btn" onclick="switchTab('npcs-section', this)">NPCs</button>
+        <button class="tab-btn" onclick="switchTab('factions-section', this)">Factions</button>
+        <button class="tab-btn" onclick="switchTab('dragons-section', this)">Dragons</button>
+        <button class="tab-btn" onclick="switchTab('gallery-section', this)">Gallery</button>
+        <button class="tab-btn" onclick="switchTab('bastion-section', this)">Bastion</button>
+        <button class="tab-btn" onclick="switchTab('protocols-section', this)">Council Protocol</button>
+        <button class="tab-btn" onclick="switchTab('spells-section', this)">Spellbook</button>
+        <button class="tab-btn" onclick="switchTab('quests-section', this)">Quests</button>
+
+        <button id="auth-btn" class="btn" style="width: auto; padding: 5px 15px; background-color: #3ab34a; color: white; border: 1px solid var(--primary-color); margin-left:auto;" onclick="openLogin()">🔒 Login</button>
+        <button id="edit-mode-btn" class="btn" style="display: none; width: auto; padding: 5px 15px; background-color: #555; color: white; border: 1px solid var(--primary-color);" onclick="toggleEditMode()">👁️ View Mode</button>
+    </nav>
+
+    <main style="display: flex; flex-grow: 1; overflow: hidden;">
+        <div id="map-section" class="section active">
+            <div id="map"></div>
+        </div>
+
+        <div id="chars-section" class="section">
+            <details class="add-details" id="details-chars">
+                <summary>➕ Add New Character</summary>
+                <div class="add-form">
+                    <input type="text" id="char-name" placeholder="Character Name" style="width: 100%;">
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <input type="text" id="char-bg" placeholder="Background (e.g. Criminal)">
+                        <input type="text" id="char-age" placeholder="Age (e.g. 25)">
+                    </div>
+                    <textarea id="char-app" placeholder="Appearance (Height, Hair, Scars...)" style="height: 60px; width: 100%;"></textarea>
+                    <textarea id="char-desc" placeholder="Backstory & Notes" style="height: 80px; width: 100%;"></textarea>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label">Upload Image:</label>
+                        <input type="file" id="char-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box; margin-bottom: 5px;">
+                    </div>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label" style="color:#9c27b0;">Upload Spellbook Cover (optional):</label>
+                        <input type="file" id="char-spellbook_image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box; margin-bottom: 5px;">
+                    </div>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label" style="color:#b33a3a;">Password for personal secrets/quests:</label>
+                        <input type="text" id="char-password" placeholder="Set password..." style="width: 100%; box-sizing: border-box;">
+                    </div>
+                    <button class="btn" style="width:100%; margin-top: 10px;" onclick="addEntity('chars')">Save Character</button>
+                </div>
+            </details>
+            <div class="grid-container" id="chars-grid"></div>
+        </div>
+
+        <div id="npcs-section" class="section">
+            <details class="add-details" id="details-npcs">
+                <summary>➕ Add New NPC</summary>
+                <div class="add-form">
+                    <input type="text" id="npc-name" placeholder="Name" style="width: 100%;">
+                    <input type="text" id="npc-faction_alignment" placeholder="Faction Alignment (e.g. Harpers, Cult of the Dragon)" style="width: 100%;">
+                    <textarea id="npc-appearance" placeholder="Appearance:" style="height: 60px; width: 100%;"></textarea>
+                    <textarea id="npc-special" placeholder="Special:" style="height: 60px; width: 100%;"></textarea>
+                    <textarea id="npc-desc" placeholder="General Notes / Description" style="height: 80px; width: 100%;"></textarea>
+                    
+                    <div style="width: 100%; margin-bottom: 5px;">
+                        <label class="file-upload-label">Relationship to Party (Hostile ➔ Friendly):</label>
+                        <input type="range" id="npc-rep" min="0" max="100" value="50" style="width: 100%; cursor: pointer;">
+                    </div>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label">Upload Image:</label>
+                        <input type="file" id="npc-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <button class="btn" style="width:100%;" onclick="addEntity('npcs')">Save</button>
+                </div>
+            </details>
+            <div class="grid-container" id="npcs-grid"></div>
+        </div>
+
+        <div id="factions-section" class="section">
+            <details class="add-details" id="details-factions">
+                <summary>➕ Add New Faction</summary>
+                <div class="add-form">
+                    <input type="text" id="faction-name" placeholder="Faction Name" style="width: 100%;">
+                    <input type="text" id="faction-leader" placeholder="Leader:" style="width: 100%;">
+                    <textarea id="faction-goal" placeholder="Goal:" style="height: 60px; width: 100%;"></textarea>
+                    <textarea id="faction-known_for" placeholder="Known for:" style="height: 60px; width: 100%;"></textarea>
+                    <textarea id="faction-desc" placeholder="General Description" style="height: 80px; width: 100%;"></textarea>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label">Upload Image:</label>
+                        <input type="file" id="faction-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <button class="btn" style="width:100%;" onclick="addEntity('factions')">Save</button>
+                </div>
+            </details>
+            <div class="grid-container" id="factions-grid"></div>
+        </div>
+
+        <div id="dragons-section" class="section">
+            <details class="add-details" id="details-dragons">
+                <summary>➕ Add New Dragon</summary>
+                <div class="add-form">
+                    <input type="text" id="dragon-name" placeholder="Name or Type of Dragon (e.g. Venomfang)" style="width: 100%;">
+                    <textarea id="dragon-physiology" placeholder="Physiology (Build/Scales):" style="height: 60px; width: 100%;"></textarea>
+                    <textarea id="dragon-abilities" placeholder="Abilities (Breath Weapon/Magic):" style="height: 60px; width: 100%;"></textarea>
+                    <textarea id="dragon-behavior" placeholder="Behavior (Mentality/Traits):" style="height: 60px; width: 100%;"></textarea>
+                    <textarea id="dragon-habitat" placeholder="Habitat (Lair/Terrain):" style="height: 60px; width: 100%;"></textarea>
+                    <textarea id="dragon-desc" placeholder="Deeds, Notes & Special Features..." style="height: 80px; width: 100%;"></textarea>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label">Upload Image:</label>
+                        <input type="file" id="dragon-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <button class="btn" style="width:100%;" onclick="addEntity('dragons')">Save</button>
+                </div>
+            </details>
+            <div class="grid-container" id="dragons-grid"></div>
+        </div>
+
+        <div id="gallery-section" class="section">
+            <details class="add-details" id="details-gallery">
+                <summary>➕ Add New Image</summary>
+                <div class="add-form">
+                    <input type="text" id="gallery-name" placeholder="Image Title / Scene / Item" style="width: 100%;">
+                    <textarea id="gallery-desc" placeholder="Short note or description..." style="height: 80px; width: 100%;"></textarea>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label">Upload Image:</label>
+                        <input type="file" id="gallery-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <button class="btn" style="width:100%;" onclick="addEntity('gallery')">Save Image</button>
+                </div>
+            </details>
+            <div class="grid-container" id="gallery-grid"></div>
+        </div>
+
+        <div id="bastion-section" class="section">
+            <details class="add-details" id="details-bastion">
+                <summary>➕ Upload New Battlemap</summary>
+                <div class="add-form">
+                    <input type="text" id="bastion-name" placeholder="Map Name (e.g. Hatchery)" style="width: 100%;">
+                    <textarea id="bastion-desc" placeholder="Enemies, Traps or Notes..." style="height: 80px; width: 100%;"></textarea>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label">Upload Battlemap:</label>
+                        <input type="file" id="bastion-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <button class="btn" style="width:100%;" onclick="addEntity('bastion')">Save Map</button>
+                </div>
+            </details>
+            <div class="grid-container" id="bastion-grid"></div>
+        </div>
+
+        <div id="protocols-section" class="section">
+            <details class="add-details" id="details-protocols">
+                <summary>➕ Add New Protocol</summary>
+                <div class="add-form">
+                    <input type="text" id="protocol-name" placeholder="Title (e.g. First Council Meeting)" style="width: 100%;">
+                    <textarea id="protocol-desc" placeholder="What was discussed? Who agreed, who opposed?" style="height: 150px; width: 100%; font-family: 'Lora', serif;"></textarea>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label">Upload Image/Handout (optional):</label>
+                        <input type="file" id="protocol-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <button class="btn" style="width:100%;" onclick="addEntity('protocols')">Save Protocol</button>
+                </div>
+            </details>
+            <div class="grid-container" id="protocols-grid" style="display: flex; justify-content: center; grid-template-columns: 1fr;"></div>
+        </div>
+
+        <div id="spells-section" class="section">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <select id="spell-char-select" onchange="onCharacterSelectChange()" style="padding: 10px; font-size: 16px; background: rgba(10,10,10,0.9); color: var(--primary-color); border: 2px solid var(--primary-color); font-family: 'Cinzel', serif; width: 100%; max-width: 400px; border-radius: 4px; cursor: pointer;">
+                    <option value="">-- Select a Character --</option>
+                </select>
+            </div>
+            <details class="add-details" id="details-spells" style="display:none;">
+                <summary>➕ Add New Spell</summary>
+                <div class="add-form">
+                    <div class="api-search-box">
+                        <input type="text" id="api-search-input" placeholder="Search D&D 5e SRD Spell in English (e.g. fireball)..." style="flex-grow: 1;">
+                        <button class="btn" style="width: auto;" onclick="searchSpellAPI()">🔍 Search & Autofill</button>
+                    </div>
+                    <hr style="border:1px solid #444; width:100%; margin-bottom:15px;">
+                    <input type="text" id="spell-name" placeholder="Name (e.g. Fireball)" style="width: 100%;">
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <input type="text" id="spell-level_school" placeholder="Level & School (e.g. 3rd-level evocation)">
+                        <input type="text" id="spell-casting_time" placeholder="Casting Time (e.g. 1 action)">
+                    </div>
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <input type="text" id="spell-range" placeholder="Range (e.g. 150 feet)">
+                        <input type="text" id="spell-duration" placeholder="Duration (e.g. Instantaneous)">
+                    </div>
+                    <input type="text" id="spell-components" placeholder="Components (e.g. V, S, M)" style="width: 100%;">
+                    <textarea id="spell-description" placeholder="Description (Damage, Saving Throws...)" style="height: 120px; width: 100%;"></textarea>
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <input type="text" id="spell-classes" placeholder="Classes (e.g. Sorcerer, Wizard)">
+                        <input type="text" id="spell-source" placeholder="Source (e.g. PHB'14 p241)">
+                    </div>
+                    <button class="btn" style="width:100%;" onclick="addSpell()">Save Spell</button>
+                </div>
+            </details>
+            <div class="grid-container" id="spells-grid"></div>
+        </div>
+
+        <div id="quests-section" class="section">
+            <details class="add-details" id="details-quests">
+                <summary>➕ Add New Quest</summary>
+                <div class="add-form">
+                    <input type="text" id="quest-title" placeholder="Quest Title / Milestone Name" style="width: 100%;">
+                    
+                    <div style="width: 100%; margin-bottom: 5px;">
+                        <label class="file-upload-label">Quest Type:</label>
+                        <select id="quest-is-group" onchange="toggleQuestCharSelect()" style="width: 100%;">
+                            <option value="true">Group Goals (Main/Side Quest)</option>
+                            <option value="false">Personal Character Secret / Motive</option>
+                        </select>
+                    </div>
+                    
+                    <div id="quest-char-wrapper" style="display: none; width: 100%;">
+                        <label class="file-upload-label">For which character (Requires password to view):</label>
+                        <select id="quest-char-id" style="width: 100%;"></select>
+                    </div>
+
+                    <textarea id="quest-desc" placeholder="Quest details or DM notes..." style="height: 120px; width: 100%;"></textarea>
+                    <button class="btn" style="width:100%;" onclick="saveQuest()">Save Quest</button>
+                </div>
+            </details>
+            
+            <div class="grid-container" id="quests-grid" style="display: flex; justify-content: center; grid-template-columns: 1fr;"></div>
+        </div>
+
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" style="display:none; position:fixed; z-index:10005; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+        <div style="background:var(--card-bg); padding:25px; border:2px solid var(--primary-color); border-radius:8px; width:300px; text-align:center;">
+            <h3 style="font-family:'Cinzel', serif; color:var(--primary-color); margin-top:0;">DM Login</h3>
+            <p style="font-size:12px; margin-top:-10px; color:#aaa;">(Tyranny for Editor / admin for DM)</p>
+            <input type="text" id="login-user" placeholder="Username" style="width:100%; padding:10px; margin-bottom:10px; box-sizing:border-box; background:rgba(0,0,0,0.6); color:white; border:1px solid #444; font-family: inherit;">
+            <input type="password" id="login-pass" placeholder="Password" style="width:100%; padding:10px; margin-bottom:20px; box-sizing:border-box; background:rgba(0,0,0,0.6); color:white; border:1px solid #444; font-family: inherit;">
+            <button class="btn" onclick="performLogin()" style="margin-bottom:10px;">Login</button>
+            <button class="btn btn-danger" onclick="closeLogin()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.92); align-items:center; justify-content:center; cursor:zoom-out; flex-direction:column; backdrop-filter:blur(5px);" onclick="closeLightbox()">
+        <span style="position:absolute; top:15px; right:25px; color:#fff; font-size:40px; font-weight:bold; cursor:pointer; font-family:sans-serif;">&times;</span>
+        <img id="lightbox-img" src="" style="max-width:90%; max-height:80%; object-fit:contain; border:2px solid var(--primary-color); border-radius:4px; box-shadow:0 0 20px rgba(0,0,0,0.8);">
+        <h2 id="lightbox-title" style="color:var(--primary-color); font-family:'Cinzel', serif; margin:15px 0 5px 0; text-shadow:2px 2px 4px #000; font-size:24px; text-align:center; max-width:85%;"></h2>
+        <p id="lightbox-desc" style="color:#bbb; font-family:'Lora', serif; margin:0; text-shadow:1px 1px 2px #000; font-size:15px; text-align:center; max-width:85%; white-space:pre-wrap;"></p>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        let editMode = false;
+        let authRole = 'none'; 
+        
+        let isSpellbookOpen = false;
+        let activeSpellId = null;
+
+        let isQuestbookOpen = false;
+        let currentQuestPage = 'group'; 
+        let allQuests = [];
+        let charactersData = [];
+        let unlockedCharId = null; // Speichert den aktuell entsperrten Charakter für Geheimnisse
+
+        let isProtocolBookOpen = false;
+        let activeProtocolId = null;
+        let allProtocols = [];
+
+        async function checkAuth() {
+            const res = await fetch('/api/auth_status');
+            const data = await res.json();
+            authRole = data.role;
+            
+            const editBtn = document.getElementById('edit-mode-btn');
+            const authBtn = document.getElementById('auth-btn');
+            
+            if(authRole === 'editor' || authRole === 'admin') {
+                editBtn.style.display = 'inline-block';
+                authBtn.innerHTML = '🔓 Logout' + (authRole==='admin'?' (DM)':'');
+                authBtn.onclick = performLogout;
+                authBtn.style.backgroundColor = '#b33a3a';
+                if(isQuestbookOpen) renderQuestBook(); 
+            } else {
+                editBtn.style.display = 'none';
+                authBtn.innerHTML = '🔒 Login';
+                authBtn.onclick = openLogin;
+                authBtn.style.backgroundColor = '#3ab34a';
+                if(editMode) toggleEditMode();
+                if(isQuestbookOpen) renderQuestBook();
+            }
+        }
+
+        function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
+        function closeLogin() {
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+        }
+
+        async function performLogin() {
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: u, password: p})
+            });
+            if(res.ok) {
+                closeLogin();
+                checkAuth();
+            } else {
+                alert('Incorrect Username or Password!');
+            }
+        }
+
+        async function performLogout() {
+            await fetch('/api/logout', { method: 'POST' });
+            checkAuth();
+        }
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const btn = document.getElementById('edit-mode-btn');
+            
+            if (editMode) {
+                document.body.classList.add('edit-mode');
+                btn.innerHTML = '🛠️ Edit Mode';
+                btn.style.backgroundColor = 'var(--primary-color)';
+                btn.style.color = '#000';
+            } else {
+                document.body.classList.remove('edit-mode');
+                btn.innerHTML = '👁️ View Mode';
+                btn.style.backgroundColor = '#555';
+                btn.style.color = 'white';
+                document.querySelectorAll('.add-details').forEach(el => el.removeAttribute('open'));
+            }
+            
+            if (typeof map !== 'undefined') {
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Marker) {
+                        if (editMode) layer.dragging.enable();
+                        else layer.dragging.disable();
+                    }
+                });
+            }
+            if(isQuestbookOpen) renderQuestBook();
+        }
+
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+            if(tabId === 'map-section') setTimeout(() => { map.invalidateSize(); }, 100);
+        }
+
+        function openLightbox(src, title, desc) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-title').innerText = title;
+            document.getElementById('lightbox-desc').innerText = desc;
+            document.getElementById('lightbox-modal').style.display = 'flex';
+        }
+        function closeLightbox() { document.getElementById('lightbox-modal').style.display = 'none'; }
+
+        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2 });
+        const bounds = [[-1000, 0], [0, 800]]; 
+        L.imageOverlay('https://media.wizards.com/2015/images/dnd/resources/Sword-Coast-Map_HighRes.jpg', bounds).addTo(map);
+        map.fitBounds(bounds);
+
+        const customIcon = L.icon({
+            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        async function loadPins() {
+            const res = await fetch('/api/pins');
+            const pins = await res.json();
+            map.eachLayer(layer => { if(layer instanceof L.Marker || layer instanceof L.Polyline) map.removeLayer(layer); });
+            const routeCoords = [];
+
+            pins.forEach(pin => {
+                const content = `
+                    <div class="popup-custom" id="pin-content-${pin.id}">
+                        ${pin.image ? `<img src="${pin.image}">` : ''}
+                        <h3 id="pin-title-${pin.id}">${pin.title}</h3>
+                        <p id="pin-desc-${pin.id}">${pin.description}</p>
+                        <div class="route-edit">
+                            <span style="font-size: 12px;">Route No:</span>
+                            <input type="number" id="order-${pin.id}" value="${pin.order_index}">
+                            <button class="btn" style="padding: 2px 5px; font-size: 12px;" onclick="updateRouteOrder(event, ${pin.id})">OK</button>
+                        </div>
+                        <div class="action-buttons" id="pin-actions-${pin.id}" style="margin-top: 10px; display: flex; gap: 5px;">
+                            <button class="btn" style="background-color: #555; color: white;" onclick="editPin(${pin.id}, event)">Edit</button>
+                            <button class="btn btn-danger" style="margin-top: 0;" onclick="deletePin(event, ${pin.id})">Delete</button>
+                        </div>
+                    </div>`;
+                const marker = L.marker([pin.y, pin.x], {icon: customIcon, draggable: editMode}).addTo(map).bindPopup(content);
+                routeCoords.push([pin.y, pin.x]);
+                marker.on('dragend', async function(e) {
+                    const newPos = e.target.getLatLng();
+                    await fetch(`/api/pins/${pin.id}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({y: newPos.lat, x: newPos.lng})});
+                    loadPins();
+                });
+            });
+            if (routeCoords.length > 1) { L.polyline(routeCoords, { color: '#e60000', weight: 5, dashArray: '10, 10', opacity: 1.0, smoothFactor: 1 }).addTo(map); }
+        }
+
+        let tempMarker = null;
+        map.on('contextmenu', function(e) {
+            if (!editMode) return;
+            if(tempMarker) map.removeLayer(tempMarker);
+            const y = e.latlng.lat, x = e.latlng.lng;
+            const nextOrder = document.querySelectorAll('.leaflet-marker-icon').length + 1;
+            const formHtml = `
+                <div class="map-form popup-custom">
+                    <h3 style="font-size:16px;">New Location</h3>
+                    <input type="text" id="new-pin-title" placeholder="Location Name" style="box-sizing:border-box;">
+                    <label class="file-upload-label">Upload Image:</label>
+                    <input type="file" id="new-pin-image" accept="image/*" style="color:white; box-sizing:border-box;">
+                    <textarea id="new-pin-desc" placeholder="What happened?" style="box-sizing:border-box;"></textarea>
+                    <label class="file-upload-label">Step in route:</label>
+                    <input type="number" id="new-pin-order" value="${nextOrder}" style="box-sizing:border-box;">
+                    <button class="btn" onclick="savePin(${y}, ${x})">Save</button>
+                </div>
+            `;
+            tempMarker = L.popup().setLatLng([y, x]).setContent(formHtml).openOn(map);
+        });
+
+        async function savePin(y, x) {
+            const formData = new FormData();
+            formData.append('y', y); formData.append('x', x);
+            formData.append('title', document.getElementById('new-pin-title').value);
+            formData.append('description', document.getElementById('new-pin-desc').value);
+            formData.append('order_index', document.getElementById('new-pin-order').value);
+            const fileInput = document.getElementById('new-pin-image');
+            if(fileInput.files.length > 0) formData.append('image', fileInput.files[0]);
+            await fetch('/api/pins', { method: 'POST', body: formData });
+            map.closePopup(); loadPins();
+        }
+
+        function editPin(id, event) {
+            if(event) event.stopPropagation();
+            const titleEl = document.getElementById(`pin-title-${id}`);
+            const descEl = document.getElementById(`pin-desc-${id}`);
+            const currentTitle = titleEl ? titleEl.innerText : '';
+            const currentDesc = descEl ? descEl.innerText : '';
+            const container = document.getElementById(`pin-content-${id}`);
+            container.innerHTML = `
+                <h3 style="font-size:16px;">Edit Pin</h3>
+                <input type="text" id="edit-pin-title-${id}" value="${currentTitle}" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 5px; margin-bottom: 5px; font-family: 'Cinzel', serif; box-sizing:border-box;">
+                <label class="file-upload-label">New Image (optional):</label>
+                <input type="file" id="edit-pin-image-${id}" accept="image/*" style="width: 100%; margin-bottom: 5px; color: #fff; box-sizing:border-box;">
+                <textarea id="edit-pin-desc-${id}" style="width: 100%; height: 100px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 5px; margin-bottom: 5px; font-family: inherit; white-space: pre-wrap; box-sizing:border-box;">${currentDesc}</textarea>
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <button class="btn" onclick="savePinEdit(${id}, event)">Save</button>
+                    <button class="btn btn-danger" style="margin-top: 0;" onclick="loadPins()">Cancel</button>
+                </div>
+            `;
+        }
+
+        async function savePinEdit(id, event) {
+            if(event) event.stopPropagation();
+            const formData = new FormData();
+            formData.append('title', document.getElementById(`edit-pin-title-${id}`).value);
+            formData.append('description', document.getElementById(`edit-pin-desc-${id}`).value);
+            const fileInput = document.getElementById(`edit-pin-image-${id}`);
+            if (fileInput.files.length > 0) formData.append('image', fileInput.files[0]);
+            await fetch(`/api/pins/${id}`, { method: 'PUT', body: formData });
+            loadPins();
+        }
+
+        async function updateRouteOrder(event, id) {
+            if(event) event.stopPropagation();
+            await fetch(`/api/pins/${id}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({order_index: document.getElementById(`order-${id}`).value}) });
+            loadPins();
+        }
+        async function deletePin(event, id) {
+            if(event) event.stopPropagation();
+            await fetch(`/api/pins/${id}`, { method: 'DELETE' });
+            loadPins();
+        }
+
+        function renderProtocolBook() {
+            const gridEl = document.getElementById('protocols-grid');
+            
+            if(!isProtocolBookOpen) {
+                gridEl.innerHTML = `
+                    <div class="quest-book-wrapper">
+                        <div class="protocol-cover" onclick="isProtocolBookOpen=true; renderProtocolBook();">
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (allProtocols.length === 0) {
+                gridEl.innerHTML = `
+                    <div class="quest-book-wrapper">
+                        <div class="quest-pages" style="max-width:700px; justify-content:center;">
+                            <div class="quest-page" style="width:100%; border-radius:4px;">
+                                <h2 class="quest-page-title">Council Protocols</h2>
+                                <p style="text-align:center; font-style:italic; font-weight:bold;">The book is empty. No sessions have been logged yet.</p>
+                                <button class="btn btn-danger" style="display:block; margin: 20px auto 0; width:auto; padding:6px 12px; background-color:#8b5a2b; border:none; color:white; font-family:'Cinzel', serif;" onclick="isProtocolBookOpen=false; renderProtocolBook();">✖ Close</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!activeProtocolId || !allProtocols.find(p => p.id == activeProtocolId)) {
+                activeProtocolId = allProtocols[0].id;
+            }
+
+            let options = allProtocols.map(p => `<option value="${p.id}" ${p.id == activeProtocolId ? 'selected' : ''}>${p.name}</option>`).join('');
+            let activeProtocol = allProtocols.find(p => p.id == activeProtocolId);
+            const escapedName = activeProtocol.name.replace(/'/g, "\\'");
+
+            let contentHtml = `
+                <div style="display:flex; gap:10px; margin-bottom:20px; align-items:center; border-bottom: 2px solid #8b5a2b; padding-bottom: 10px;">
+                    <span style="font-family:'Cinzel', serif; font-weight:bold; color:#5c3a21;">Entry:</span>
+                    <select onchange="activeProtocolId=this.value; renderProtocolBook();" style="flex-grow:1; padding:5px; font-family:'Cinzel', serif; background:rgba(0,0,0,0.05); border:1px solid #8b5a2b; color:#5c3a21; font-weight:bold; font-size:16px; cursor:pointer;">
+                        ${options}
+                    </select>
+                    <button class="btn btn-danger" style="margin:0; width:auto; padding:6px 12px; background-color:#8b5a2b; border:none; color:white; font-family:'Cinzel', serif;" onclick="isProtocolBookOpen=false; renderProtocolBook();">✖ Close</button>
+                </div>
+                
+                <div id="protocol-page-${activeProtocol.id}">
+                    ${activeProtocol.image ? `<img src="${activeProtocol.image}" alt="Handout" style="width:100%; max-height:300px; object-fit:contain; margin-bottom:20px; cursor:pointer; border: 2px solid #8b5a2b; border-radius: 4px; box-shadow: 2px 2px 8px rgba(0,0,0,0.5);" onclick="openLightbox('${activeProtocol.image}', '${escapedName}', 'Protocol / Handout')">` : ''}
+                    <h3 style="font-family:'Cinzel', serif; font-size: 24px; color:#8b2b2b; margin-top:0;">${activeProtocol.name}</h3>
+                    <p style="font-family:'Lora', serif; font-size:15px; line-height:1.6; white-space:pre-wrap; font-weight:bold; color:#2b1b07;">${activeProtocol.description || '-'}</p>
+                    
+                    <div class="action-buttons" style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button class="btn" style="background-color: #5c3a21; color: white; padding: 5px 15px; font-size:13px; width:auto;" onclick="editEntity('protocols', ${activeProtocol.id})">Edit</button>
+                        <button class="btn btn-danger" style="margin-top: 0; padding: 5px 15px; font-size:13px; width:auto;" onclick="deleteEntity('protocols', ${activeProtocol.id})">Delete</button>
+                    </div>
+                </div>
+            `;
+
+            gridEl.innerHTML = `
+                <div class="quest-book-wrapper">
+                    <div class="quest-pages" style="max-width:700px; justify-content:center;">
+                        <div class="quest-page" style="width:100%; border-radius:4px;">
+                            ${contentHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        async function loadEntities(type) {
+            const res = await fetch('/api/' + type);
+            const data = await res.json();
+            
+            if (type === 'protocols') {
+                allProtocols = data;
+                renderProtocolBook();
+                return;
+            }
+            
+            if (type === 'chars') {
+                charactersData = data; 
+                const spellSelect = document.getElementById('spell-char-select');
+                const questCharSelect = document.getElementById('quest-char-id');
+                const spellCurrentVal = spellSelect.value;
+                const questCurrentVal = questCharSelect.value;
+                
+                let opts = '<option value="">-- Select a Character --</option>';
+                data.forEach(char => { opts += `<option value="${char.id}" data-pwd="${char.has_password}" data-sbimg="${char.spellbook_image || ''}">${char.name}</option>`; });
+                
+                spellSelect.innerHTML = opts; spellSelect.value = spellCurrentVal;
+                questCharSelect.innerHTML = opts; questCharSelect.value = questCurrentVal;
+            }
+
+            const container = document.getElementById(type + '-grid');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            data.forEach(item => {
+                if (type === 'chars') {
+                    const fallbackImg = `<div style="width:70px; height:70px; border-radius:50%; background:#050505; display:flex; align-items:center; justify-content:center; color:#666; font-size:10px;">No Image</div>`;
+                    container.innerHTML += `
+                        <div class="card" id="chars-${item.id}">
+                            <details class="char-details">
+                                <summary>
+                                    <div class="char-summary-header">
+                                        ${item.image ? `<img src="${item.image}" alt="Avatar">` : fallbackImg}
+                                        <div class="summary-info">
+                                            <h3 id="chars-name-${item.id}">${item.name}</h3>
+                                            <p>Click to Expand ▼</p>
+                                        </div>
+                                    </div>
+                                </summary>
+                                <div class="dnd-sheet-full">
+                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${item.name.replace(/'/g, "\\'")}', 'Character Portrait')">` : ''}
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                        <div class="dnd-stat-box"><div class="dnd-stat-label">Background</div><div class="dnd-stat-value" id="chars-bg-${item.id}">${item.background || '-'}</div></div>
+                                        <div class="dnd-stat-box"><div class="dnd-stat-label">Age</div><div class="dnd-stat-value" id="chars-age-${item.id}">${item.age || '-'}</div></div>
+                                    </div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Appearance</div><div class="dnd-stat-value" id="chars-app-${item.id}">${item.appearance || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Backstory / Notes</div><div class="dnd-stat-value" id="chars-desc-${item.id}">${item.description || '-'}</div></div>
+                                    <div class="action-buttons" style="display: flex; gap: 10px; margin-top: 10px;">
+                                        <button class="btn" style="background-color: #555; color: white;" onclick="editEntity('chars', ${item.id})">Edit</button>
+                                        <button class="btn btn-danger" style="margin-top: 0;" onclick="deleteEntity('chars', ${item.id})">Delete</button>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>`;
+                } else if (type === 'dragons') {
+                    const fallbackImg = `<div style="width:70px; height:70px; border-radius:8px; background:#050505; border: 2px solid var(--primary-color); display:flex; align-items:center; justify-content:center; color:#666; font-size:10px;">No Image</div>`;
+                    container.innerHTML += `
+                        <div class="card" id="dragons-${item.id}">
+                            <details class="char-details">
+                                <summary>
+                                    <div class="dragon-summary-header">
+                                        ${item.image ? `<img src="${item.image}" alt="Avatar">` : fallbackImg}
+                                        <div class="summary-info">
+                                            <h3 id="dragons-name-${item.id}">${item.name}</h3>
+                                            <p>Click to Expand ▼</p>
+                                        </div>
+                                    </div>
+                                </summary>
+                                <div class="dnd-sheet-full">
+                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${item.name.replace(/'/g, "\\'")}', 'Dragon Bestiary')">` : ''}
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Physiology</div><div class="dnd-stat-value" id="dragons-phys-${item.id}">${item.physiology || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Abilities</div><div class="dnd-stat-value" id="dragons-abil-${item.id}">${item.abilities || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Behavior</div><div class="dnd-stat-value" id="dragons-behav-${item.id}">${item.behavior || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Habitat</div><div class="dnd-stat-value" id="dragons-hab-${item.id}">${item.habitat || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Notes & Deeds</div><div class="dnd-stat-value" id="dragons-desc-${item.id}">${item.description || '-'}</div></div>
+                                    <div class="action-buttons" style="display: flex; gap: 10px; margin-top: 10px;">
+                                        <button class="btn" style="background-color: #555; color: white;" onclick="editEntity('dragons', ${item.id})">Edit</button>
+                                        <button class="btn btn-danger" style="margin-top: 0;" onclick="deleteEntity('dragons', ${item.id})">Delete</button>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>`;
+                } else if (type === 'npcs') {
+                    const fallbackImg = `<div style="width:70px; height:70px; border-radius:50%; background:#050505; border: 2px solid var(--primary-color); display:flex; align-items:center; justify-content:center; color:#666; font-size:10px;">No Image</div>`;
+                    let repVal = item.reputation !== undefined ? item.reputation : 50;
+                    let repColor = repVal < 40 ? '#b33a3a' : (repVal > 60 ? '#3ab34a' : '#dddddd');
+                    let repHTML = `<div class="rep-container" data-val="${repVal}" style="height: 6px; margin-top: 6px; max-width: 150px;"><div class="rep-bar" style="width: ${repVal}%; background-color: ${repColor};"></div></div>`;
+                    container.innerHTML += `
+                        <div class="card" id="npcs-${item.id}">
+                            <details class="char-details">
+                                <summary>
+                                    <div class="char-summary-header">
+                                        ${item.image ? `<img src="${item.image}" alt="Avatar">` : fallbackImg}
+                                        <div class="summary-info">
+                                            <h3 id="npcs-name-${item.id}">${item.name}</h3>
+                                            ${repHTML}
+                                            <p>Click to Expand ▼</p>
+                                        </div>
+                                    </div>
+                                </summary>
+                                <div class="dnd-sheet-full">
+                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${item.name.replace(/'/g, "\\'")}', 'NPC Portrait')">` : ''}
+                                    <div class="dnd-stat-box" style="border-left: 3px solid ${repColor};">
+                                        <div class="dnd-stat-label">Exact Relationship (${repVal}/100)</div>
+                                        <div class="rep-container" data-val="${repVal}"><div class="rep-bar" style="width: ${repVal}%; background-color: ${repColor};"></div></div>
+                                    </div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Faction Alignment</div><div class="dnd-stat-value" id="npcs-faction-${item.id}">${item.faction_alignment || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Appearance</div><div class="dnd-stat-value" id="npcs-app-${item.id}">${item.appearance || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Special</div><div class="dnd-stat-value" id="npcs-special-${item.id}">${item.special || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Description & Notes</div><div class="dnd-stat-value" id="npcs-desc-${item.id}">${item.description || '-'}</div></div>
+                                    <div class="action-buttons" style="display: flex; gap: 10px; margin-top: 10px;">
+                                        <button class="btn" style="background-color: #555; color: white;" onclick="editEntity('npcs', ${item.id})">Edit</button>
+                                        <button class="btn btn-danger" style="margin-top: 0;" onclick="deleteEntity('npcs', ${item.id})">Delete</button>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>`;
+                } else if (type === 'factions') {
+                    const fallbackImg = `<div style="width:70px; height:70px; border-radius:4px; background:#050505; border: 2px solid var(--primary-color); display:flex; align-items:center; justify-content:center; color:#666; font-size:10px;">No Image</div>`;
+                    container.innerHTML += `
+                        <div class="card" id="factions-${item.id}">
+                            <details class="char-details">
+                                <summary>
+                                    <div class="faction-summary-header">
+                                        ${item.image ? `<img src="${item.image}" alt="Avatar">` : fallbackImg}
+                                        <div class="summary-info">
+                                            <h3 id="factions-name-${item.id}">${item.name}</h3>
+                                            <p>Click to Expand ▼</p>
+                                        </div>
+                                    </div>
+                                </summary>
+                                <div class="dnd-sheet-full">
+                                    ${item.image ? `<img src="${item.image}" alt="Wappen" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${item.name.replace(/'/g, "\\'")}', 'Faction Crest')">` : ''}
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Leader</div><div class="dnd-stat-value" id="factions-leader-${item.id}">${item.leader || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Goal</div><div class="dnd-stat-value" id="factions-goal-${item.id}">${item.goal || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">Known for</div><div class="dnd-stat-value" id="factions-known-${item.id}">${item.known_for || '-'}</div></div>
+                                    <div class="dnd-stat-box"><div class="dnd-stat-label">General / History</div><div class="dnd-stat-value" id="factions-desc-${item.id}">${item.description || '-'}</div></div>
+                                    <div class="action-buttons" style="display: flex; gap: 10px; margin-top: 10px;">
+                                        <button class="btn" style="background-color: #555; color: white;" onclick="editEntity('factions', ${item.id})">Edit</button>
+                                        <button class="btn btn-danger" style="margin-top: 0;" onclick="deleteEntity('factions', ${item.id})">Delete</button>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>`;
+                } else if (type === 'gallery' || type === 'bastion') {
+                    const fallbackImg = `<div style="height:250px; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:#888; border-bottom: 2px solid var(--primary-color);">No Image</div>`;
+                    const escapedDesc = (item.description || '').replace(/'/g, "\\'").replace(/\n/g, " ");
+                    const escapedName = item.name.replace(/'/g, "\\'");
+                    container.innerHTML += `
+                        <div class="card" id="${type}-${item.id}">
+                            ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width:100%; height:200px; object-fit:cover; cursor:pointer; border-bottom:1px solid #444;" onclick="openLightbox('${item.image}', '${escapedName}', '${escapedDesc}')">` : fallbackImg}
+                            <div class="card-content">
+                                <h3 id="${type}-name-${item.id}" style="font-size:16px; margin-bottom:5px;">${item.name}</h3>
+                                <p id="${type}-desc-${item.id}" style="font-size:13px; color:#aaa; max-height:60px; overflow:hidden; text-overflow:ellipsis;">${item.description || '-'}</p>
+                                <div class="action-buttons" style="margin-top: 10px; display: flex; gap: 10px;">
+                                    <button class="btn" style="background-color: #555; color: white; padding: 3px 5px; font-size:12px;" onclick="editEntity('${type}', ${item.id})">Edit</button>
+                                    <button class="btn btn-danger" style="margin-top: 0; padding: 3px 5px; font-size:12px;" onclick="deleteEntity('${type}', ${item.id})">Delete</button>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            });
+        }
+
+        function editEntity(type, id) {
+            const nameEl = document.getElementById(`${type}-name-${id}`);
+            const descEl = document.getElementById(`${type}-desc-${id}`);
+            const currentName = nameEl ? nameEl.innerText : '';
+            const currentDesc = descEl ? descEl.innerText : '';
+            
+            let extraFieldsHTML = '';
+            if (type === 'chars') {
+                const bgEl = document.getElementById(`chars-bg-${id}`);
+                const ageEl = document.getElementById(`chars-age-${id}`);
+                const appEl = document.getElementById(`chars-app-${id}`);
+                extraFieldsHTML = `
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="text" id="chars-edit-bg-${id}" value="${bgEl ? bgEl.innerText : ''}" placeholder="Background" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; box-sizing: border-box;">
+                        <input type="text" id="chars-edit-age-${id}" value="${ageEl ? ageEl.innerText : ''}" placeholder="Age" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; box-sizing: border-box;">
+                    </div>
+                    <textarea id="chars-edit-app-${id}" placeholder="Appearance" style="width: 100%; height: 80px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; white-space: pre-wrap; box-sizing: border-box;">${appEl ? appEl.innerText : ''}</textarea>
+                    <label class="file-upload-label" style="margin-bottom: 5px; color:#9c27b0;">New Spellbook Cover (optional):</label>
+                    <input type="file" id="chars-edit-spellbook_image-${id}" accept="image/*" style="width: 100%; margin-bottom: 10px; color: #fff; box-sizing: border-box;">
+                    <label class="file-upload-label" style="margin-bottom: 5px; color:#b33a3a;">Change Secret Password (empty=none):</label>
+                    <input type="text" id="chars-edit-password-${id}" placeholder="Password for Quests" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+                `;
+            } else if (type === 'npcs') {
+                const repContainer = document.querySelector(`#${type}-${id} .rep-container`);
+                const currentRep = repContainer ? repContainer.getAttribute('data-val') : 50;
+                const factionEl = document.getElementById(`npcs-faction-${id}`);
+                const appEl = document.getElementById(`npcs-app-${id}`);
+                const specialEl = document.getElementById(`npcs-special-${id}`);
+                extraFieldsHTML = `
+                    <input type="text" id="npcs-edit-faction-${id}" value="${factionEl ? factionEl.innerText : ''}" placeholder="Faction Alignment" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+                    <textarea id="npcs-edit-app-${id}" placeholder="Appearance" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${appEl ? appEl.innerText : ''}</textarea>
+                    <textarea id="npcs-edit-special-${id}" placeholder="Special" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${specialEl ? specialEl.innerText : ''}</textarea>
+                    <label class="file-upload-label" style="margin-bottom: 5px;">Change Relationship:</label>
+                    <input type="range" id="npcs-edit-rep-${id}" min="0" max="100" value="${currentRep}" style="width: 100%; margin-bottom: 15px; cursor: pointer;">
+                `;
+            } else if (type === 'factions') {
+                const leaderEl = document.getElementById(`factions-leader-${id}`);
+                const goalEl = document.getElementById(`factions-goal-${id}`);
+                const knownEl = document.getElementById(`factions-known-${id}`);
+                extraFieldsHTML = `
+                    <input type="text" id="factions-edit-leader-${id}" value="${leaderEl ? leaderEl.innerText : ''}" placeholder="Leader" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+                    <textarea id="factions-edit-goal-${id}" placeholder="Goal" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${goalEl ? goalEl.innerText : ''}</textarea>
+                    <textarea id="factions-edit-known-${id}" placeholder="Known for" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${knownEl ? knownEl.innerText : ''}</textarea>
+                `;
+            } else if (type === 'dragons') {
+                const physEl = document.getElementById(`dragons-phys-${id}`);
+                const abilEl = document.getElementById(`dragons-abil-${id}`);
+                const behavEl = document.getElementById(`dragons-behav-${id}`);
+                const habEl = document.getElementById(`dragons-hab-${id}`);
+                extraFieldsHTML = `
+                    <textarea id="dragons-edit-phys-${id}" placeholder="Physiology" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${physEl ? physEl.innerText : ''}</textarea>
+                    <textarea id="dragons-edit-abil-${id}" placeholder="Abilities" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${abilEl ? abilEl.innerText : ''}</textarea>
+                    <textarea id="dragons-edit-behav-${id}" placeholder="Behavior" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${behavEl ? behavEl.innerText : ''}</textarea>
+                    <textarea id="dragons-edit-hab-${id}" placeholder="Habitat" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${habEl ? habEl.innerText : ''}</textarea>
+                `;
+            }
+
+            const container = (type === 'protocols') ? document.getElementById(`protocol-page-${id}`) :
+                              (type === 'chars' || type === 'dragons' || type === 'npcs' || type === 'factions') ? document.querySelector(`#${type}-${id} .dnd-sheet-full`) : 
+                              document.querySelector(`#${type}-${id} .card-content`);
+            
+            container.innerHTML = `
+                <input type="text" id="${type}-edit-name-${id}" value="${currentName}" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; font-family: 'Cinzel', serif; margin-bottom: 10px; box-sizing: border-box;">
+                ${extraFieldsHTML}
+                <label class="file-upload-label" style="margin-bottom: 5px;">New Image/Handout (optional):</label>
+                <input type="file" id="${type}-edit-image-${id}" accept="image/*" style="width: 100%; margin-bottom: 10px; color: #fff; box-sizing: border-box;">
+                <textarea id="${type}-edit-desc-${id}" placeholder="Description / History / Notes" style="width: 100%; height: 120px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; font-family: inherit; margin-bottom: 10px; white-space: pre-wrap; box-sizing: border-box;">${currentDesc}</textarea>
+                <div class="action-buttons" style="display: flex; gap: 10px;">
+                    <button class="btn" onclick="saveEntityEdit('${type}', ${id})">Save</button>
+                    <button class="btn btn-danger" style="margin-top: 0;" onclick="loadEntities('${type}')">Cancel</button>
+                </div>
+            `;
+        }
+
+        async function saveEntityEdit(type, id) {
+            const formData = new FormData();
+            formData.append('name', document.getElementById(`${type}-edit-name-${id}`).value);
+            formData.append('description', document.getElementById(`${type}-edit-desc-${id}`).value);
+            
+            if (type === 'chars') {
+                formData.append('background', document.getElementById(`chars-edit-bg-${id}`).value);
+                formData.append('age', document.getElementById(`chars-edit-age-${id}`).value);
+                formData.append('appearance', document.getElementById(`chars-edit-app-${id}`).value);
+                
+                const pwdInput = document.getElementById(`chars-edit-password-${id}`);
+                if (pwdInput && pwdInput.value) formData.append('char_password', pwdInput.value);
+
+                const sbInput = document.getElementById(`chars-edit-spellbook_image-${id}`);
+                if (sbInput && sbInput.files.length > 0) formData.append('spellbook_image', sbInput.files[0]);
+            } else if (type === 'npcs') {
+                formData.append('reputation', document.getElementById(`npcs-edit-rep-${id}`).value);
+                formData.append('appearance', document.getElementById(`npcs-edit-app-${id}`).value);
+                formData.append('faction_alignment', document.getElementById(`npcs-edit-faction-${id}`).value);
+                formData.append('special', document.getElementById(`npcs-edit-special-${id}`).value);
+            } else if (type === 'factions') {
+                formData.append('leader', document.getElementById(`factions-edit-leader-${id}`).value);
+                formData.append('goal', document.getElementById(`factions-edit-goal-${id}`).value);
+                formData.append('known_for', document.getElementById(`factions-edit-known-${id}`).value);
+            } else if (type === 'dragons') {
+                formData.append('physiology', document.getElementById(`dragons-edit-phys-${id}`).value);
+                formData.append('abilities', document.getElementById(`dragons-edit-abil-${id}`).value);
+                formData.append('behavior', document.getElementById(`dragons-edit-behav-${id}`).value);
+                formData.append('habitat', document.getElementById(`dragons-edit-hab-${id}`).value);
+            }
+            
+            const fileInput = document.getElementById(`${type}-edit-image-${id}`);
+            if (fileInput && fileInput.files.length > 0) formData.append('image', fileInput.files[0]);
+            
+            await fetch(`/api/${type}/${id}`, { method: 'PUT', body: formData });
+            loadEntities(type);
+        }
+
+        async function addEntity(type) {
+            let prefix = type;
+            if (type === 'chars') prefix = 'char';
+            if (type === 'npcs') prefix = 'npc';
+            if (type === 'factions') prefix = 'faction';
+            if (type === 'dragons') prefix = 'dragon';
+            if (type === 'bastion') prefix = 'bastion';
+            if (type === 'protocols') prefix = 'protocol';
+
+            const name = document.getElementById(`${prefix}-name`).value;
+            if(!name) return alert("Title/Name cannot be empty!");
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', document.getElementById(`${prefix}-desc`).value);
+            
+            if (type === 'chars') {
+                formData.append('background', document.getElementById(`${prefix}-bg`).value);
+                formData.append('age', document.getElementById(`${prefix}-age`).value);
+                formData.append('appearance', document.getElementById(`${prefix}-app`).value);
+                
+                const pwdInput = document.getElementById(`${prefix}-password`);
+                if(pwdInput) formData.append('char_password', pwdInput.value);
+
+                const sbInput = document.getElementById(`${prefix}-spellbook_image`);
+                if(sbInput && sbInput.files.length > 0) formData.append('spellbook_image', sbInput.files[0]);
+            } else if (type === 'npcs') {
+                formData.append('reputation', document.getElementById(`npc-rep`).value);
+                formData.append('appearance', document.getElementById(`${prefix}-appearance`).value);
+                formData.append('faction_alignment', document.getElementById(`${prefix}-faction_alignment`).value);
+                formData.append('special', document.getElementById(`${prefix}-special`).value);
+            } else if (type === 'factions') {
+                formData.append('leader', document.getElementById(`${prefix}-leader`).value);
+                formData.append('goal', document.getElementById(`${prefix}-goal`).value);
+                formData.append('known_for', document.getElementById(`${prefix}-known_for`).value);
+            } else if (type === 'dragons') {
+                formData.append('physiology', document.getElementById(`${prefix}-physiology`).value);
+                formData.append('abilities', document.getElementById(`${prefix}-abilities`).value);
+                formData.append('behavior', document.getElementById(`${prefix}-behavior`).value);
+                formData.append('habitat', document.getElementById(`${prefix}-habitat`).value);
+            }
+            
+            const fileInput = document.getElementById(`${prefix}-image`);
+            if(fileInput && fileInput.files.length > 0) formData.append('image', fileInput.files[0]);
+
+            const res = await fetch(`/api/${type}`, { method: 'POST', body: formData });
+            
+            if(res.ok) {
+                document.getElementById(`${prefix}-name`).value = '';
+                document.getElementById(`${prefix}-desc`).value = '';
+                if(document.getElementById(`${prefix}-image`)) document.getElementById(`${prefix}-image`).value = '';
+                
+                if (type === 'chars') {
+                    document.getElementById(`${prefix}-bg`).value = '';
+                    document.getElementById(`${prefix}-age`).value = '';
+                    document.getElementById(`${prefix}-app`).value = '';
+                    document.getElementById(`${prefix}-password`).value = '';
+                    if(document.getElementById(`${prefix}-spellbook_image`)) document.getElementById(`${prefix}-spellbook_image`).value = '';
+                } else if (type === 'npcs') {
+                    document.getElementById(`npc-rep`).value = 50;
+                    document.getElementById(`${prefix}-appearance`).value = '';
+                    document.getElementById(`${prefix}-faction_alignment`).value = '';
+                    document.getElementById(`${prefix}-special`).value = '';
+                } else if (type === 'factions') {
+                    document.getElementById(`${prefix}-leader`).value = '';
+                    document.getElementById(`${prefix}-goal`).value = '';
+                    document.getElementById(`${prefix}-known_for`).value = '';
+                } else if (type === 'dragons') {
+                    document.getElementById(`${prefix}-physiology`).value = '';
+                    document.getElementById(`${prefix}-abilities`).value = '';
+                    document.getElementById(`${prefix}-behavior`).value = '';
+                    document.getElementById(`${prefix}-habitat`).value = '';
+                }
+                
+                document.getElementById(`details-${type}`).removeAttribute('open');
+                
+                if (type === 'protocols') {
+                    isProtocolBookOpen = true; 
+                }
+                
+                loadEntities(type);
+            } else {
+                alert("Error during creation! Are you logged in?");
+            }
+        }
+
+        async function deleteEntity(type, id) {
+            await fetch(`/api/${type}/${id}`, { method: 'DELETE' });
+            if (type === 'quests') { loadQuests(); } 
+            else { loadEntities(type); }
+        }
+
+        function onCharacterSelectChange() {
+            isSpellbookOpen = false;
+            activeSpellId = null;
+            loadSpells();
+        }
+
+        async function searchSpellAPI() {
+            let query = document.getElementById('api-search-input').value.toLowerCase().trim().replace(/ /g, '-');
+            if(!query) return alert("Please enter an English spell name (e.g. fireball).");
+
+            try {
+                const res = await fetch(`https://www.dnd5eapi.co/api/spells/${query}`);
+                if(!res.ok) throw new Error("Spell not found.");
+                const data = await res.json();
+
+                document.getElementById('spell-name').value = data.name;
+                document.getElementById('spell-level_school').value = `${data.level === 0 ? 'Cantrip' : data.level + 'nd-level'} ${data.school.name.toLowerCase()}`;
+                document.getElementById('spell-casting_time').value = data.casting_time;
+                document.getElementById('spell-range').value = data.range;
+                document.getElementById('spell-components').value = data.components.join(', ') + (data.material ? ` (${data.material})` : '');
+                document.getElementById('spell-duration').value = data.duration;
+                
+                let descText = data.desc.join('\n\n');
+                if (data.higher_level) {
+                    descText += '\n\nAt Higher Levels: ' + data.higher_level.join('\n');
+                }
+                document.getElementById('spell-description').value = descText;
+                
+                document.getElementById('spell-classes').value = data.classes.map(c => c.name).join(', ');
+                document.getElementById('spell-source').value = "D&D 5e SRD '14";
+
+                alert("Spell '" + data.name + "' loaded successfully!");
+            } catch(e) {
+                alert("Spell not found! Please make sure to use the original English SRD name (e.g. 'cure-wounds' or 'fireball').");
+            }
+        }
+
+        async function loadSpells() {
+            const charSelect = document.getElementById('spell-char-select');
+            const charId = charSelect.value;
+            const detailsEl = document.getElementById('details-spells');
+            const gridEl = document.getElementById('spells-grid');
+            
+            if (!charId) {
+                detailsEl.style.display = 'none';
+                gridEl.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Please select a character above to open their spellbook.</p>';
+                return;
+            }
+            
+            detailsEl.style.display = 'block';
+
+            const res = await fetch(`/api/spells?character_id=${charId}`);
+            const spells = await res.json();
+            
+            const selectedOption = charSelect.options[charSelect.selectedIndex];
+            const charName = selectedOption.text;
+            const sbImg = selectedOption.getAttribute('data-sbimg');
+            
+            gridEl.innerHTML = '';
+            
+            if(spells.length === 0) {
+                gridEl.innerHTML = '<p style="text-align:center; width:100%; color:#888;">This spellbook is currently empty.</p>';
+                return;
+            }
+
+            if (!spells.find(s => s.id == activeSpellId)) { activeSpellId = spells[0].id; }
+
+            let html = '';
+
+            if (!isSpellbookOpen) {
+                if (sbImg && sbImg !== 'null') {
+                    html = `
+                        <div class="spellbook-wrapper">
+                            <div class="custom-spellbook-cover" onclick="toggleSpellbook(true)">
+                                <img src="${sbImg}" alt="Spellbook Cover">
+                            </div>
+                        </div>`;
+                } else {
+                    html = `
+                        <div class="spellbook-wrapper">
+                            <div class="spellbook-cover" onclick="toggleSpellbook(true)">
+                                <h2 style="font-family:'Cinzel', serif; font-size:28px; margin-bottom:10px;">Spellbook</h2>
+                                <p style="font-style:italic; font-family:'Lora', serif; font-size: 16px;">Property of ${charName}</p>
+                                <p style="margin-top:40px; font-size:12px; opacity:0.6; font-family:sans-serif; text-transform:uppercase; letter-spacing:2px;">(Click to Open)</p>
+                            </div>
+                        </div>`;
+                }
+            } else {
+                let options = spells.map(s => `<option value="${s.id}" ${s.id == activeSpellId ? 'selected' : ''}>${s.name}</option>`).join('');
+
+                let pagesHtml = spells.map(spell => `
+                    <div id="spell-page-${spell.id}" style="display: ${spell.id == activeSpellId ? 'block' : 'none'};">
+                        <div class="spell-title" id="spells-name-${spell.id}">${spell.name}</div>
+                        <div class="spell-source" id="spells-source-${spell.id}">${spell.source || ''}</div>
+                        <div class="spell-meta" id="spells-level_school-${spell.id}">${spell.level_school || ''}</div>
+                        <ul class="spell-stats">
+                            <li><strong>Casting Time:</strong> <span id="spells-casting_time-${spell.id}">${spell.casting_time || '-'}</span></li>
+                            <li><strong>Range:</strong> <span id="spells-range-${spell.id}">${spell.range || '-'}</span></li>
+                            <li><strong>Components:</strong> <span id="spells-components-${spell.id}">${spell.components || '-'}</span></li>
+                            <li><strong>Duration:</strong> <span id="spells-duration-${spell.id}">${spell.duration || '-'}</span></li>
+                        </ul>
+                        <div class="spell-desc" id="spells-description-${spell.id}">${spell.description || '-'}</div>
+                        <div class="spell-footer"><strong>Classes:</strong> <span id="spells-classes-${spell.id}">${spell.classes || '-'}</span></div>
+                        <div class="action-buttons" style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+                            <button class="btn" style="background-color: #5c3a21; color: white; padding: 3px 8px; font-size:12px; width:auto;" onclick="editSpell(${spell.id})">Edit</button>
+                            <button class="btn btn-danger" style="margin-top: 0; padding: 3px 8px; font-size:12px; width:auto;" onclick="deleteSpell(${spell.id})">Delete</button>
+                        </div>
+                    </div>`).join('');
+
+                html = `
+                    <div class="spellbook-wrapper">
+                        <div class="spellbook-pages">
+                            <div style="display:flex; gap:10px; margin-bottom:20px; align-items:center; border-bottom: 1px solid #8b5a2b; padding-bottom: 10px;">
+                                <span style="font-family:'Cinzel', serif; font-weight:bold; color:#5c3a21;">Bookmark:</span>
+                                <select id="spell-navigator" onchange="changeActiveSpell(this.value)" style="flex-grow:1; padding:5px; font-family:'Cinzel', serif; background:rgba(0,0,0,0.05); border:1px solid #8b5a2b; color:#5c3a21; font-weight:bold; font-size:16px; cursor:pointer;">
+                                    ${options}
+                                </select>
+                                <button class="btn btn-danger" style="margin:0; width:auto; padding:6px 12px; background-color:#8b5a2b;" onclick="toggleSpellbook(false)">✖ Close</button>
+                            </div>
+                            ${pagesHtml}
+                        </div>
+                    </div>`;
+            }
+            gridEl.innerHTML = html;
+        }
+
+        function toggleSpellbook(state) { isSpellbookOpen = state; loadSpells(); }
+        function changeActiveSpell(id) { activeSpellId = id; loadSpells(); }
+
+        function toggleQuestCharSelect() {
+            const isGroup = document.getElementById('quest-is-group').value === 'true';
+            document.getElementById('quest-char-wrapper').style.display = isGroup ? 'none' : 'block';
+        }
+
+        async function saveQuest() {
+            const title = document.getElementById('quest-title').value;
+            const desc = document.getElementById('quest-desc').value;
+            const isGroup = document.getElementById('quest-is-group').value;
+            const charId = document.getElementById('quest-char-id').value;
+
+            if(!title) return alert("Quest title cannot be empty!");
+            if(isGroup === 'false' && !charId) return alert("Please select a character for the personal quest!");
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', desc);
+            formData.append('is_group', isGroup);
+            if(isGroup === 'false') formData.append('character_id', charId);
+
+            const res = await fetch('/api/quests', { method: 'POST', body: formData });
+            if(res.ok) {
+                document.getElementById('quest-title').value = '';
+                document.getElementById('quest-desc').value = '';
+                document.getElementById('details-quests').removeAttribute('open');
+                isQuestbookOpen = true; 
+                loadQuests();
+            } else {
+                alert("Error. Are you logged in?");
+            }
+        }
+
+        // --- QUEST BOOK RENDER ---
+        function renderQuestBook() {
+            const gridEl = document.getElementById('quests-grid');
+            if(!isQuestbookOpen) {
+                gridEl.innerHTML = `
+                    <div class="quest-book-wrapper">
+                        <div class="quest-cover" onclick="isQuestbookOpen=true; renderQuestBook();">
+                            <h2 style="font-family:'Cinzel', serif; font-size:32px; margin-bottom:10px; text-shadow: 2px 2px 5px #000;">Adventure<br>Logbook</h2>
+                            <p style="margin-top:40px; font-size:12px; opacity:0.6; font-family:sans-serif; text-transform:uppercase; letter-spacing:2px;">(Click to Open)</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const groupQuests = allQuests.filter(q => q.is_group);
+            const personalQuests = allQuests.filter(q => !q.is_group);
+
+            let contentHtml = '';
+            let navHtml = '';
+
+            if (currentQuestPage === 'group') {
+                let groupHtml = '';
+                groupQuests.forEach(q => {
+                    const compClass = q.status === 'completed' ? 'completed' : '';
+                    groupHtml += `
+                        <div class="quest-item ${compClass}">
+                            <h4>${q.title}</h4>
+                            <p>${q.description}</p>
+                            <div class="action-buttons" style="margin-top:5px; gap:5px;">
+                                ${q.status !== 'completed' ? `<button class="btn" style="background:#2b6e3b; padding:2px 5px; font-size:11px;" onclick="toggleQuestStatus(${q.id}, 'completed')">✔ Complete</button>` : `<button class="btn" style="background:#555; padding:2px 5px; font-size:11px;" onclick="toggleQuestStatus(${q.id}, 'active')">↩ Reactivate</button>`}
+                                <button class="btn btn-danger" style="margin:0; padding:2px 5px; font-size:11px;" onclick="deleteEntity('quests', ${q.id})">✖ Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                contentHtml = `
+                    <h2 class="quest-page-title">The Group's Journey</h2>
+                    ${groupHtml || '<p style="text-align:center; font-style:italic;">No active quests.</p>'}
+                `;
+                navHtml = `
+                    <button class="btn btn-danger" style="padding:5px 10px; width:auto; margin:0; font-family:'Cinzel', serif;" onclick="unlockedCharId=null; isQuestbookOpen=false; renderQuestBook();">✖ Close</button>
+                    <button class="quest-nav-btn" onclick="unlockedCharId=null; currentQuestPage='personal'; renderQuestBook();">Personal Motives ➔</button>
+                `;
+            } else {
+                let personalHtml = '';
+                
+                if (authRole === 'admin') {
+                    // Admin sieht alle persönlichen Quests sortiert nach Charakter
+                    charactersData.forEach(char => {
+                        const charQuests = personalQuests.filter(q => q.character_id == char.id);
+                        if(charQuests.length > 0) {
+                            personalHtml += `<div class="char-quest-header">Secrets of ${char.name}</div>`;
+                            charQuests.forEach(q => {
+                                const compClass = q.status === 'completed' ? 'completed' : '';
+                                personalHtml += `
+                                    <div class="quest-item ${compClass}">
+                                        <h4>${q.title}</h4>
+                                        <p>${(q.description||'').replace(/\n/g, '<br>')}</p>
+                                        <div class="action-buttons" style="margin-top:5px; gap:5px;">
+                                            ${q.status !== 'completed' ? `<button class="btn" style="background:#2b6e3b; padding:2px 5px; font-size:11px;" onclick="toggleQuestStatus(${q.id}, 'completed')">✔ Complete</button>` : `<button class="btn" style="background:#555; padding:2px 5px; font-size:11px;" onclick="toggleQuestStatus(${q.id}, 'active')">↩ Reactivate</button>`}
+                                            <button class="btn btn-danger" style="margin:0; padding:2px 5px; font-size:11px;" onclick="deleteEntity('quests', ${q.id})">✖ Delete</button>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        }
+                    });
+                } else {
+                    // Spieler-Ansicht: Muss erst entsperren
+                    if (!unlockedCharId) {
+                        let charOpts = '<option value="">-- Select Character --</option>';
+                        charactersData.forEach(c => {
+                            charOpts += `<option value="${c.id}">${c.name}</option>`;
+                        });
+                        personalHtml = `
+                            <div style="text-align:center; padding: 40px 20px;">
+                                <p style="font-family:'Lora', serif; font-weight:bold; color:#5c3a21; margin-bottom:15px;">Access restricted. Select your character and enter your password to view personal motives.</p>
+                                <select id="secret-char-select" style="width:100%; max-width:300px; padding:8px; margin-bottom:10px; background:rgba(0,0,0,0.05); border:1px solid #8b5a2b; font-family:'Cinzel', serif; color:#5c3a21; font-weight:bold; cursor:pointer;">
+                                    ${charOpts}
+                                </select><br>
+                                <input type="password" id="secret-char-pwd" placeholder="Password" style="width:100%; max-width:300px; padding:8px; margin-bottom:15px; border:1px solid #8b5a2b; background:#fff; color:#000; font-family:inherit;"><br>
+                                <button class="btn" style="background-color:#8b2b2b; color:#fff; width:auto; padding:8px 20px;" onclick="submitSecretAuth()">Unlock Secrets</button>
+                            </div>
+                        `;
+                    } else {
+                        // Spieler hat entsperrt
+                        const char = charactersData.find(c => c.id == unlockedCharId);
+                        const charQuests = personalQuests.filter(q => q.character_id == unlockedCharId);
+                        
+                        personalHtml += `<div class="char-quest-header">Secrets of ${char.name}</div>`;
+                        if (charQuests.length > 0) {
+                            charQuests.forEach(q => {
+                                const compClass = q.status === 'completed' ? 'completed' : '';
+                                personalHtml += `
+                                    <div class="quest-item ${compClass}">
+                                        <h4>${q.title}</h4>
+                                        <p>${(q.description||'').replace(/\n/g, '<br>')}</p>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            personalHtml += `<p style="text-align:center; font-style:italic;">No personal secrets found.</p>`;
+                        }
+                        
+                        personalHtml += `
+                            <div style="text-align:center; margin-top:30px;">
+                                <button class="btn" style="background-color:#555; color:white; width:auto; padding:5px 15px;" onclick="unlockedCharId=null; renderQuestBook();">🔒 Lock Secrets</button>
+                            </div>
+                        `;
+                    }
+                }
+
+                contentHtml = `
+                    <h2 class="quest-page-title">Personal Motives</h2>
+                    ${personalHtml || (authRole==='admin' ? '<p style="text-align:center; font-style:italic;">No secrets available.</p>' : '')}
+                `;
+                navHtml = `
+                    <button class="quest-nav-btn" onclick="unlockedCharId=null; currentQuestPage='group'; renderQuestBook();">⬅ Group's Journey</button>
+                    <button class="btn btn-danger" style="padding:5px 10px; width:auto; margin:0; font-family:'Cinzel', serif;" onclick="unlockedCharId=null; isQuestbookOpen=false; renderQuestBook();">✖ Close</button>
+                `;
+            }
+
+            gridEl.innerHTML = `
+                <div class="quest-book-wrapper">
+                    <div class="quest-pages">
+                        <div class="quest-page">
+                            ${contentHtml}
+                            <div class="quest-nav-container">
+                                ${navHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function submitSecretAuth() {
+            const charId = document.getElementById('secret-char-select').value;
+            const pwd = document.getElementById('secret-char-pwd').value;
+            if (!charId) return alert("Please select a character.");
+            if (!pwd) return alert("Please enter a password.");
+
+            const res = await fetch('/api/verify_char_pwd', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ char_id: charId, password: pwd })
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                unlockedCharId = parseInt(charId);
+                renderQuestBook();
+            } else {
+                alert("Incorrect password!");
+            }
+        }
+
+        async function loadQuests() {
+            const res = await fetch('/api/quests');
+            allQuests = await res.json();
+            renderQuestBook();
+        }
+
+        async function toggleQuestStatus(id, newStatus) {
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            await fetch(`/api/quests/${id}`, { method: 'PUT', body: formData });
+            loadQuests();
+        }
+
+        checkAuth();
+        loadPins();
+        loadEntities('chars');
+        loadEntities('npcs');
+        loadEntities('factions');
+        loadEntities('dragons');
+        loadEntities('gallery');
+        loadEntities('bastion');
+        loadEntities('protocols');
+        loadQuests();
+
+    </script>
+</body>
+</html>
