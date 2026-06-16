@@ -24,13 +24,27 @@
             display: flex; 
             flex-direction: column; 
             height: 100vh; 
+            background-color: #0f0f0f;
             background-image: linear-gradient(rgba(15, 15, 15, 0.8), rgba(15, 15, 15, 0.8)), url('/static/bg.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            overflow-x: hidden;
         }
+
+        /* --- FIRE & WEATHER CANVAS --- */
+        #ember-canvas, #weather-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        #ember-canvas { z-index: 1; }
+        #weather-canvas { z-index: 2; }
         
-        nav { background-color: var(--nav-bg); padding: 15px 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--primary-color); z-index: 1000; backdrop-filter: blur(5px); flex-wrap: wrap;}
+        nav { position: relative; background-color: var(--nav-bg); padding: 15px 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--primary-color); z-index: 1000; backdrop-filter: blur(5px); flex-wrap: wrap;}
         .nav-brand { display: flex; align-items: center; gap: 15px; margin-right: auto; }
         .nav-brand img { height: 40px; object-fit: contain; }
         .nav-brand h1 { margin: 0; font-family: 'Cinzel', serif; color: var(--primary-color); font-size: 20px; text-shadow: 2px 2px 4px #000;}
@@ -38,10 +52,15 @@
         .tab-btn { background: none; border: none; color: var(--text-color); font-family: 'Cinzel', serif; font-size: 15px; cursor: pointer; padding: 5px 8px; transition: color 0.3s; text-shadow: 1px 1px 2px #000; }
         .tab-btn:hover, .tab-btn.active { color: var(--primary-color); border-bottom: 1px solid var(--primary-color); }
 
+        main { position: relative; z-index: 10; display: flex; flex-grow: 1; overflow: hidden; }
+
         .section { display: none; flex-grow: 1; padding: 20px; overflow-y: auto; }
         .section.active { display: block; }
         #map-section.active { display: flex; padding: 0; overflow: hidden; position: relative; }
-        #map { width: 100%; height: 100%; background-color: #000; }
+        
+        /* Map Background Transparent */
+        #map { width: 100%; height: 100%; background-color: transparent; }
+        .leaflet-container { background: transparent !important; }
 
         .leaflet-popup-content-wrapper { background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--primary-color); border-radius: 8px; width: 280px; backdrop-filter: blur(5px); }
         .leaflet-popup-tip { background-color: var(--card-bg); }
@@ -55,7 +74,15 @@
 
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; align-items: start;}
         
-        .card { background-color: var(--card-bg); border: 1px solid #444; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(3px); }
+        /* Karten Design (Flach, kein 3D mehr) */
+        .card { 
+            background-color: var(--card-bg); 
+            border: 1px solid #444; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            backdrop-filter: blur(3px); 
+        }
         .card-content { padding: 15px; }
         .card-content h3 { margin: 0 0 10px 0; font-family: 'Cinzel', serif; color: var(--primary-color); }
         .card-content p { margin: 0; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
@@ -79,7 +106,6 @@
         .char-details summary::-webkit-details-marker { display: none; }
         
         .char-summary-header, .dragon-summary-header, .faction-summary-header { display: flex; align-items: center; gap: 15px; min-height: 95px; padding: 5px 0; }
-        
         .char-summary-header img { width: 70px; height: 70px; object-fit: cover; border-radius: 50%; border: 2px solid var(--primary-color); background-color: #000; flex-shrink: 0; }
         .dragon-summary-header img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid var(--primary-color); background-color: #000; flex-shrink: 0; }
         .faction-summary-header img { width: 70px; height: 70px; object-fit: scale-down; border-radius: 4px; border: 2px solid var(--primary-color); background-color: #000; flex-shrink: 0; }
@@ -119,11 +145,10 @@
         .quest-cover { background-image: url('/static/acc.jpg'); background-size: cover; background-position: center; border: 4px solid #cda434; border-radius: 8px; box-shadow: 10px 10px 25px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; width: 100%; max-width: 400px; height: 550px; user-select: none; position: relative; }
         .quest-cover:hover { transform: scale(1.02) perspective(600px) rotateY(-5deg); box-shadow: 15px 15px 35px rgba(0,0,0,0.9); }
         
-        /* Das ist das neue Council-Cover */
         .protocol-cover { background-image: url('/static/council.jpg'); background-size: cover; background-position: center; border: 4px solid #cda434; border-radius: 8px; box-shadow: 10px 10px 25px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; width: 100%; max-width: 400px; height: 550px; user-select: none; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .protocol-cover:hover { transform: scale(1.02) perspective(600px) rotateY(-5deg); box-shadow: 15px 15px 35px rgba(0,0,0,0.9); }
 
-        .quest-pages { display: flex; width: 100%; max-width: 700px; animation: openBookAnim 0.5s ease-out forwards; justify-content: center; }
+        .quest-pages { display: flex; width: 100%; max-width: 700px; animation: openBookAnim 0.5s ease-out forwards; justify-content: center; z-index: 5;}
         .quest-page { width: 100%; background-image: url('/static/image_b0505c.jpg'); background-size: cover; background-position: center; color: #2b1b07; padding: 40px 40px 80px 40px; min-height: 600px; position: relative; border-radius: 4px; box-shadow: 5px 5px 20px rgba(0,0,0,0.8); }
 
         .quest-page-title { font-family: 'Cinzel', serif; font-size: 28px; color: #5c3a21; text-align: center; border-bottom: 2px solid #8b5a2b; padding-bottom: 10px; margin-top: 0; margin-bottom: 25px; text-transform: uppercase; }
@@ -161,13 +186,46 @@
         
         .api-search-box { background: rgba(139, 90, 43, 0.2); border: 1px solid var(--primary-color); border-radius: 4px; padding: 10px; width: 100%; display: flex; gap: 10px; margin-bottom: 15px; box-sizing: border-box; align-items: center; }
 
-        /* Tactical Token CSS */
-        .custom-token-icon { border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        /* WIDGET: FAERUN KALENDER & WETTER */
+        #weather-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(10, 10, 10, 0.9);
+            border: 2px solid var(--primary-color);
+            border-radius: 50px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            z-index: 1001;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: transform 0.2s;
+        }
+        #weather-widget:hover { transform: scale(1.05); }
+        .weather-icon { font-size: 24px; }
+        .weather-text { display: flex; flex-direction: column; }
+        .weather-date { font-family: 'Cinzel', serif; color: var(--primary-color); font-weight: bold; font-size: 14px; }
+        .weather-cond { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Wetter Admin Modal */
+        #weather-admin-modal {
+            display:none; position:fixed; z-index:10005; left:0; top:0; width:100%; height:100%; 
+            background:rgba(0,0,0,0.8); align-items:center; justify-content:center; backdrop-filter:blur(5px);
+        }
+        .weather-admin-box {
+            background:var(--card-bg); padding:25px; border:2px solid var(--primary-color); 
+            border-radius:8px; width:300px; text-align:center;
+        }
         
         @media (max-width: 900px) {
             .quest-pages { flex-direction: column; }
             .quest-page.left { border-radius: 4px 4px 0 0; border-right: none; border-bottom: 2px solid #8b5a2b; box-shadow: inset 0 -15px 20px rgba(0,0,0,0.1); }
             .quest-page.right { border-radius: 0 0 4px 4px; border-left: none; box-shadow: inset 0 15px 20px rgba(0,0,0,0.1); }
+            #weather-widget { bottom: 10px; right: 10px; padding: 5px 15px; border-radius: 8px;}
+            .weather-date { font-size: 12px; }
         }
         @media (max-width: 768px) {
             .nav-brand { width: 100%; justify-content: center; margin-right: 0; margin-bottom: 5px; }
@@ -185,6 +243,11 @@
 </head>
 <body>
 
+    <!-- FIRE PARTICLES CANVAS -->
+    <canvas id="ember-canvas"></canvas>
+    <!-- WEATHER PARTICLES CANVAS -->
+    <canvas id="weather-canvas"></canvas>
+
     <nav>
         <div class="nav-brand">
             <img src="/static/logo.jpg" alt="Tyranny of Dragons">
@@ -196,7 +259,7 @@
         <button class="tab-btn" onclick="switchTab('npcs-section', this)">NPCs</button>
         <button class="tab-btn" onclick="switchTab('factions-section', this)">Factions</button>
         <button class="tab-btn" onclick="switchTab('dragons-section', this)">Dragons</button>
-        <button class="tab-btn" onclick="switchTab('gallery-section', this)">Gallery</button>
+        <button class="tab-btn" onclick="switchTab('diary-section', this)">Tagebuch</button>
         <button class="tab-btn" onclick="switchTab('bastion-section', this)">Bastion Maps</button>
         <button class="tab-btn" onclick="switchTab('protocols-section', this)">Council</button>
         <button class="tab-btn" onclick="switchTab('spells-section', this)">Spellbook</button>
@@ -207,7 +270,52 @@
         <button id="edit-mode-btn" class="btn" style="display: none; width: auto; padding: 5px 15px; background-color: #555; color: white; border: 1px solid var(--primary-color);" onclick="toggleEditMode()">👁️ View Mode</button>
     </nav>
 
-    <main style="display: flex; flex-grow: 1; overflow: hidden;">
+    <!-- WETTER WIDGET UI -->
+    <div id="weather-widget" onclick="openWeatherAdmin()">
+        <div class="weather-icon" id="w-icon">☀️</div>
+        <div class="weather-text">
+            <span class="weather-date" id="w-date">1. Flamerule 1489 DR</span>
+            <span class="weather-cond" id="w-cond">Sunny</span>
+        </div>
+    </div>
+
+    <!-- WETTER ADMIN MODAL -->
+    <div id="weather-admin-modal">
+        <div class="weather-admin-box">
+            <h3 style="font-family:'Cinzel', serif; color:var(--primary-color); margin-top:0;">Time & Weather</h3>
+            
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <input type="number" id="edit-w-day" placeholder="Day" style="width:50px; background:#111; color:#fff; border:1px solid #444; padding:5px;">
+                <select id="edit-w-month" style="flex-grow:1; background:#111; color:#fff; border:1px solid #444; padding:5px;">
+                    <option value="Hammer">Hammer (Deep Winter)</option>
+                    <option value="Alturiak">Alturiak (The Claw of Winter)</option>
+                    <option value="Ches">Ches (The Claw of Sunsets)</option>
+                    <option value="Tarsakh">Tarsakh (The Claw of Storms)</option>
+                    <option value="Mirtul">Mirtul (The Melting)</option>
+                    <option value="Kythorn">Kythorn (The Time of Flowers)</option>
+                    <option value="Flamerule">Flamerule (Summertide)</option>
+                    <option value="Eleasis">Eleasis (Highsun)</option>
+                    <option value="Eleint">Eleint (The Fading)</option>
+                    <option value="Marpenoth">Marpenoth (Leaffall)</option>
+                    <option value="Uktar">Uktar (The Rotting)</option>
+                    <option value="Nightal">Nightal (The Drawing Down)</option>
+                </select>
+                <input type="number" id="edit-w-year" placeholder="Year" style="width:70px; background:#111; color:#fff; border:1px solid #444; padding:5px;">
+            </div>
+
+            <select id="edit-w-cond" style="width:100%; margin-bottom:20px; background:#111; color:#fff; border:1px solid #444; padding:5px;">
+                <option value="sunny">☀️ Sunny / Clear</option>
+                <option value="rain">🌧️ Rain</option>
+                <option value="snow">❄️ Snow</option>
+                <option value="storm">🌩️ Thunderstorm</option>
+            </select>
+
+            <button class="btn" onclick="saveWeatherState()" style="margin-bottom:10px;">Save Changes</button>
+            <button class="btn btn-danger" onclick="closeWeatherAdmin()">Cancel</button>
+        </div>
+    </div>
+
+    <main id="main-content">
         <div id="map-section" class="section active">
             <div id="map"></div>
         </div>
@@ -282,17 +390,25 @@
             <div class="grid-container" id="dragons-grid"></div>
         </div>
 
-        <div id="gallery-section" class="section">
-            <details class="add-details" id="details-gallery">
-                <summary>➕ Add New Image</summary>
+        <div id="diary-section" class="section">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <select id="diary-char-select" onchange="onDiaryCharChange()" style="padding: 10px; font-size: 16px; background: rgba(10,10,10,0.9); color: var(--primary-color); border: 2px solid var(--primary-color); font-family: 'Cinzel', serif; width: 100%; max-width: 400px; border-radius: 4px; cursor: pointer;">
+                    <option value="">-- Select a Character --</option>
+                </select>
+            </div>
+            <details class="add-details" id="details-diary" style="display:none;">
+                <summary>➕ Add Diary Entry</summary>
                 <div class="add-form">
-                    <input type="text" id="gallery-name" placeholder="Image Title / Scene / Item" style="width: 100%;">
-                    <textarea id="gallery-desc" placeholder="Short note or description..." style="height: 80px; width: 100%;"></textarea>
-                    <div style="width: 100%;"><label class="file-upload-label">Upload Image:</label><input type="file" id="gallery-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;"></div>
-                    <button class="btn" style="width:100%;" onclick="addEntity('gallery')">Save Image</button>
+                    <input type="text" id="diary-name" placeholder="Entry Title / Date" style="width: 100%;">
+                    <textarea id="diary-desc" placeholder="Dear Diary..." style="height: 150px; width: 100%; font-family: 'Lora', serif;"></textarea>
+                    <div style="width: 100%;">
+                        <label class="file-upload-label">Upload Sketch/Image (optional):</label>
+                        <input type="file" id="diary-image" accept="image/*" style="color:white; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <button class="btn" style="width:100%;" onclick="addEntity('diary')">Save Entry</button>
                 </div>
             </details>
-            <div class="grid-container" id="gallery-grid"></div>
+            <div class="grid-container" id="diary-grid" style="display: flex; justify-content: center; grid-template-columns: 1fr;"></div>
         </div>
 
         <div id="bastion-section" class="section">
@@ -314,7 +430,7 @@
                     <button class="btn btn-danger" style="width:auto; padding:8px 15px;" onclick="closeTacticalMap()">⬅ Back to Maps</button>
                     <h3 id="bastion-map-title" style="margin:0; font-family:'Cinzel',serif; color:var(--primary-color);">Battlemap</h3>
                 </div>
-                <div id="bastion-map" style="width:100%; flex-grow:1; background:#000; border:2px solid var(--primary-color); border-radius:4px; min-height:450px; position:relative;"></div>
+                <div id="bastion-map" style="width:100%; flex-grow:1; background:transparent; border:2px solid var(--primary-color); border-radius:4px; min-height:450px; position:relative;"></div>
             </div>
         </div>
 
@@ -417,6 +533,7 @@
         </div>
     </main>
 
+    <!-- Login Modal -->
     <div id="login-modal" style="display:none; position:fixed; z-index:10005; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; backdrop-filter:blur(5px);">
         <div style="background:var(--card-bg); padding:25px; border:2px solid var(--primary-color); border-radius:8px; width:300px; text-align:center;">
             <h3 style="font-family:'Cinzel', serif; color:var(--primary-color); margin-top:0;">DM Login</h3>
@@ -428,6 +545,7 @@
         </div>
     </div>
 
+    <!-- Lightbox -->
     <div id="lightbox-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.92); align-items:center; justify-content:center; cursor:zoom-out; flex-direction:column; backdrop-filter:blur(5px);" onclick="closeLightbox()">
         <span style="position:absolute; top:15px; right:25px; color:#fff; font-size:40px; font-weight:bold; cursor:pointer; font-family:sans-serif;">&times;</span>
         <img id="lightbox-img" src="" style="max-width:90%; max-height:80%; object-fit:contain; border:2px solid var(--primary-color); border-radius:4px; box-shadow:0 0 20px rgba(0,0,0,0.8);">
@@ -438,6 +556,172 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        // --- FIRE PARTICLES (DRAGON EMBERS) ---
+        const canvas = document.getElementById('ember-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Ember {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height; 
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 10;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * -1.5 - 0.5;
+                this.opacity = Math.random() * 0.8 + 0.2;
+                this.life = this.opacity;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life -= 0.005;
+                if (this.life <= 0 || this.y < 0) this.reset();
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, ${Math.floor(60 + Math.random() * 80)}, 0, ${this.life})`;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 100; i++) particles.push(new Ember());
+
+        function animateEmbers() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateEmbers);
+        }
+        animateEmbers();
+
+        // --- WEATHER PARTICLES (RAIN/SNOW/STORM) ---
+        const wCanvas = document.getElementById('weather-canvas');
+        const wCtx = wCanvas.getContext('2d');
+        let wParticles = [];
+        let currentWeather = 'sunny'; 
+
+        function resizeWCanvas() {
+            wCanvas.width = window.innerWidth;
+            wCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeWCanvas);
+        resizeWCanvas();
+
+        function initWeatherParticles() {
+            wParticles = [];
+            let count = 0;
+            if(currentWeather === 'rain' || currentWeather === 'storm') count = 150;
+            if(currentWeather === 'snow') count = 200;
+
+            for (let i = 0; i < count; i++) {
+                wParticles.push({
+                    x: Math.random() * wCanvas.width,
+                    y: Math.random() * wCanvas.height,
+                    speedY: (currentWeather === 'snow') ? (Math.random() * 1 + 0.5) : (Math.random() * 10 + 10),
+                    speedX: (currentWeather === 'snow') ? (Math.random() * 1 - 0.5) : (Math.random() * 2 - 1),
+                    length: (currentWeather === 'snow') ? (Math.random() * 2 + 1) : (Math.random() * 15 + 10),
+                    opacity: Math.random() * 0.5 + 0.2
+                });
+            }
+        }
+
+        let flashTimer = 0;
+        function animateWeather() {
+            wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+            
+            if (currentWeather === 'storm') {
+                flashTimer++;
+                if (flashTimer > Math.random() * 300 + 100) {
+                    wCtx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    wCtx.fillRect(0, 0, wCanvas.width, wCanvas.height);
+                    if (Math.random() > 0.5) flashTimer = 0; // Double flash
+                }
+            }
+
+            wParticles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                if (p.y > wCanvas.height) {
+                    p.y = -20;
+                    p.x = Math.random() * wCanvas.width;
+                }
+                
+                wCtx.beginPath();
+                if (currentWeather === 'snow') {
+                    wCtx.arc(p.x, p.y, p.length, 0, Math.PI * 2);
+                    wCtx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                    wCtx.fill();
+                } else {
+                    wCtx.moveTo(p.x, p.y);
+                    wCtx.lineTo(p.x + p.speedX, p.y + p.length);
+                    wCtx.strokeStyle = `rgba(150, 180, 255, ${p.opacity})`;
+                    wCtx.lineWidth = 1.5;
+                    wCtx.stroke();
+                }
+            });
+            requestAnimationFrame(animateWeather);
+        }
+        animateWeather();
+
+        // --- CAMPAIGN STATE (WEATHER WIDGET) ---
+        async function loadCampaignState() {
+            const res = await fetch('/api/campaign_state');
+            const state = await res.json();
+            
+            const emoji = { 'sunny': '☀️', 'rain': '🌧️', 'snow': '❄️', 'storm': '🌩️' };
+            const condMap = { 'sunny': 'Sunny / Clear', 'rain': 'Rain', 'snow': 'Snow', 'storm': 'Thunderstorm' };
+            
+            document.getElementById('w-date').innerText = `${state.day}. ${state.month} ${state.year} DR`;
+            document.getElementById('w-cond').innerText = condMap[state.weather] || 'Sunny';
+            document.getElementById('w-icon').innerText = emoji[state.weather] || '☀️';
+            
+            document.getElementById('edit-w-day').value = state.day;
+            document.getElementById('edit-w-month').value = state.month;
+            document.getElementById('edit-w-year').value = state.year;
+            document.getElementById('edit-w-cond').value = state.weather;
+
+            if (currentWeather !== state.weather) {
+                currentWeather = state.weather;
+                initWeatherParticles();
+            }
+        }
+
+        function openWeatherAdmin() {
+            if (authRole === 'admin') {
+                document.getElementById('weather-admin-modal').style.display = 'flex';
+            }
+        }
+        function closeWeatherAdmin() {
+            document.getElementById('weather-admin-modal').style.display = 'none';
+        }
+
+        async function saveWeatherState() {
+            const data = {
+                day: document.getElementById('edit-w-day').value,
+                month: document.getElementById('edit-w-month').value,
+                year: document.getElementById('edit-w-year').value,
+                weather: document.getElementById('edit-w-cond').value
+            };
+            await fetch('/api/campaign_state', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            closeWeatherAdmin();
+            loadCampaignState();
+        }
+
         let editMode = false;
         let authRole = 'none'; 
         
@@ -454,9 +738,15 @@
         let activeProtocolId = null;
         let allProtocols = [];
 
+        let isDiaryBookOpen = false;
+        let activeDiaryIndex = 0;
+        let allDiaryEntries = [];
+
         let bastionMap = null;
         let activeBastionId = null;
         let bastionImageOverlay = null;
+
+        const esc = str => (str || '').toString().replace(/"/g, '&quot;');
 
         async function checkAuth() {
             const res = await fetch('/api/auth_status');
@@ -644,7 +934,7 @@
             const container = document.getElementById(`pin-content-${id}`);
             container.innerHTML = `
                 <h3 style="font-size:16px;">Edit Pin</h3>
-                <input type="text" id="edit-pin-title-${id}" value="${currentTitle}" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 5px; margin-bottom: 5px; font-family: 'Cinzel', serif; box-sizing:border-box;">
+                <input type="text" id="edit-pin-title-${id}" value="${esc(currentTitle)}" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 5px; margin-bottom: 5px; font-family: 'Cinzel', serif; box-sizing:border-box;">
                 <label class="file-upload-label">New Image (optional):</label>
                 <input type="file" id="edit-pin-image-${id}" accept="image/*" style="width: 100%; margin-bottom: 5px; color: #fff; box-sizing:border-box;">
                 <textarea id="edit-pin-desc-${id}" style="width: 100%; height: 100px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 5px; margin-bottom: 5px; font-family: inherit; white-space: pre-wrap; box-sizing:border-box;">${currentDesc}</textarea>
@@ -677,7 +967,7 @@
             loadPins();
         }
 
-        // --- PROTOCOL BUCH LOGIK (SAUBER HOISTED) ---
+        // --- PROTOCOL BUCH LOGIK ---
         function renderProtocolBook() {
             const gridEl = document.getElementById('protocols-grid');
             
@@ -742,6 +1032,105 @@
                 <div class="quest-book-wrapper">
                     <div class="quest-pages" style="max-width:700px; justify-content:center;">
                         <div class="quest-page" style="width:100%; border-radius:4px;">
+                            ${contentHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- TAGEBUCH (DIARY) LOGIK ---
+        function onDiaryCharChange() {
+            const charId = document.getElementById('diary-char-select').value;
+            document.getElementById('details-diary').style.display = charId ? 'block' : 'none';
+            isDiaryBookOpen = false;
+            activeDiaryIndex = 0;
+            renderDiaryBook();
+        }
+
+        function renderDiaryBook() {
+            const gridEl = document.getElementById('diary-grid');
+            const charId = document.getElementById('diary-char-select').value;
+            
+            if (!charId) {
+                gridEl.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Please select a character above to read their diary.</p>';
+                return;
+            }
+
+            if(!isDiaryBookOpen) {
+                gridEl.innerHTML = `
+                    <div class="quest-book-wrapper">
+                        <div class="protocol-cover" onclick="isDiaryBookOpen=true; renderDiaryBook();" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; background-image: url('/static/image_b0505c.jpg');">
+                            <h2 style="font-family:'Cinzel', serif; font-size:32px; margin-bottom:10px; text-shadow: 2px 2px 5px #fff; color:#2b1b07;">Personal<br>Diary</h2>
+                            <p style="margin-top:40px; font-size:12px; font-weight:bold; font-family:sans-serif; text-transform:uppercase; letter-spacing:2px; color:#5c3a21;">(Click to Open)</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const charDiaries = allDiaryEntries.filter(d => d.character_id == charId);
+
+            if (charDiaries.length === 0) {
+                gridEl.innerHTML = `
+                    <div class="quest-book-wrapper">
+                        <div class="quest-pages" style="max-width:700px; justify-content:center;">
+                            <div class="quest-page" style="width:100%; border-radius:4px;">
+                                <h2 class="quest-page-title">Personal Diary</h2>
+                                <p style="text-align:center; font-style:italic; font-weight:bold;">The pages are blank. No entries yet.</p>
+                                <button class="btn btn-danger" style="display:block; margin: 20px auto 0; width:auto; padding:6px 12px; background-color:#8b5a2b; border:none; color:white; font-family:'Cinzel', serif;" onclick="isDiaryBookOpen=false; renderDiaryBook();">✖ Close</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (activeDiaryIndex >= charDiaries.length) activeDiaryIndex = charDiaries.length - 1;
+            if (activeDiaryIndex < 0) activeDiaryIndex = 0;
+
+            let entry = charDiaries[activeDiaryIndex];
+            const escapedName = (entry.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+
+            let navButtons = '';
+            if (activeDiaryIndex > 0) {
+                navButtons += `<button class="quest-nav-btn" onclick="activeDiaryIndex--; renderDiaryBook();">⬅ Prev</button>`;
+            } else {
+                navButtons += `<div></div>`;
+            }
+            if (activeDiaryIndex < charDiaries.length - 1) {
+                navButtons += `<button class="quest-nav-btn" onclick="activeDiaryIndex++; renderDiaryBook();">Next ➔</button>`;
+            } else {
+                navButtons += `<div></div>`;
+            }
+
+            let contentHtml = `
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #8b5a2b; padding-bottom: 10px; margin-bottom: 20px;">
+                    <span style="font-family:'Cinzel', serif; font-weight:bold; color:#5c3a21;">Entry ${activeDiaryIndex + 1} of ${charDiaries.length}</span>
+                    <button class="btn btn-danger" style="margin:0; width:auto; padding:4px 8px; background-color:#8b5a2b; border:none; color:white; font-family:'Cinzel', serif;" onclick="isDiaryBookOpen=false; renderDiaryBook();">✖ Close</button>
+                </div>
+                
+                <div id="diary-page-${entry.id}">
+                    ${entry.image ? `<img src="${entry.image}" alt="Diary Image" style="width:100%; max-height:300px; object-fit:contain; margin-bottom:20px; cursor:pointer; border: 2px solid #8b5a2b; border-radius: 4px; box-shadow: 2px 2px 8px rgba(0,0,0,0.5);" onclick="openLightbox('${entry.image}', '${escapedName}', '')">` : ''}
+                    
+                    <h3 id="diary-name-${entry.id}" style="font-family:'Cinzel', serif; font-size: 24px; color:#8b2b2b; margin-top:0;">${entry.name}</h3>
+                    <p id="diary-desc-${entry.id}" style="font-family:'Lora', serif; font-size:15px; line-height:1.6; white-space:pre-wrap; font-weight:bold; color:#2b1b07;">${entry.description || '-'}</p>
+                    
+                    <div class="action-buttons" style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button class="btn" style="background-color: #5c3a21; color: white; padding: 5px 15px; font-size:13px; width:auto;" onclick="editEntity('diary', ${entry.id})">Edit</button>
+                        <button class="btn btn-danger" style="margin-top: 0; padding: 5px 15px; font-size:13px; width:auto;" onclick="deleteEntity('diary', ${entry.id})">Delete</button>
+                    </div>
+                </div>
+                
+                <div class="quest-nav-container" style="position:relative; margin-top:30px; bottom:0; left:0; padding:0; display:flex; justify-content:space-between; width:100%;">
+                    ${navButtons}
+                </div>
+            `;
+
+            gridEl.innerHTML = `
+                <div class="quest-book-wrapper">
+                    <div class="quest-pages" style="max-width:700px; justify-content:center;">
+                        <div class="quest-page" style="width:100%; border-radius:4px; padding-bottom: 40px;">
                             ${contentHtml}
                         </div>
                     </div>
@@ -889,12 +1278,17 @@
                 renderProtocolBook();
                 return;
             }
+            if (type === 'diary') {
+                allDiaryEntries = data;
+                renderDiaryBook();
+                return;
+            }
             
             if (type === 'chars') {
                 charactersData = data; 
                 
                 // Update dropdowns
-                const selects = ['spell-char-select', 'quest-char-id', 'loot-holder-id'];
+                const selects = ['spell-char-select', 'quest-char-id', 'loot-holder-id', 'diary-char-select'];
                 selects.forEach(selId => {
                     const el = document.getElementById(selId);
                     if(el) {
@@ -932,7 +1326,7 @@
                                     </div>
                                 </summary>
                                 <div class="dnd-sheet-full">
-                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${(item.name||'').replace(/'/g, "&apos;")}', 'Character Portrait')">` : ''}
+                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${esc(item.name)}', 'Character Portrait')">` : ''}
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                         <div class="dnd-stat-box"><div class="dnd-stat-label">Background</div><div class="dnd-stat-value" id="chars-bg-${item.id}">${item.background || '-'}</div></div>
                                         <div class="dnd-stat-box"><div class="dnd-stat-label">Age</div><div class="dnd-stat-value" id="chars-age-${item.id}">${item.age || '-'}</div></div>
@@ -961,7 +1355,7 @@
                                     </div>
                                 </summary>
                                 <div class="dnd-sheet-full">
-                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${(item.name||'').replace(/'/g, "&apos;")}', 'Dragon Bestiary')">` : ''}
+                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${esc(item.name)}', 'Dragon Bestiary')">` : ''}
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Physiology</div><div class="dnd-stat-value" id="dragons-phys-${item.id}">${item.physiology || '-'}</div></div>
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Abilities</div><div class="dnd-stat-value" id="dragons-abil-${item.id}">${item.abilities || '-'}</div></div>
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Behavior</div><div class="dnd-stat-value" id="dragons-behav-${item.id}">${item.behavior || '-'}</div></div>
@@ -993,7 +1387,7 @@
                                     </div>
                                 </summary>
                                 <div class="dnd-sheet-full">
-                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${(item.name||'').replace(/'/g, "&apos;")}', 'NPC Portrait')">` : ''}
+                                    ${item.image ? `<img src="${item.image}" alt="Full Art" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${esc(item.name)}', 'NPC Portrait')">` : ''}
                                     <div class="dnd-stat-box" style="border-left: 3px solid ${repColor};">
                                         <div class="dnd-stat-label">Exact Relationship (${repVal}/100)</div>
                                         <div class="rep-container" data-val="${repVal}"><div class="rep-bar" style="width: ${repVal}%; background-color: ${repColor};"></div></div>
@@ -1024,7 +1418,7 @@
                                     </div>
                                 </summary>
                                 <div class="dnd-sheet-full">
-                                    ${item.image ? `<img src="${item.image}" alt="Wappen" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${(item.name||'').replace(/'/g, "&apos;")}', 'Faction Crest')">` : ''}
+                                    ${item.image ? `<img src="${item.image}" alt="Wappen" style="cursor:pointer;" onclick="openLightbox('${item.image}', '${esc(item.name)}', 'Faction Crest')">` : ''}
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Leader</div><div class="dnd-stat-value" id="factions-leader-${item.id}">${item.leader || '-'}</div></div>
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Goal</div><div class="dnd-stat-value" id="factions-goal-${item.id}">${item.goal || '-'}</div></div>
                                     <div class="dnd-stat-box"><div class="dnd-stat-label">Known for</div><div class="dnd-stat-value" id="factions-known-${item.id}">${item.known_for || '-'}</div></div>
@@ -1038,11 +1432,11 @@
                         </div>`;
                 } else if (type === 'bastion') {
                     const fallbackImg = `<div style="height:250px; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:#888; border-bottom: 2px solid var(--primary-color);">No Image</div>`;
-                    const escapedDesc = (item.description || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;").replace(/\n/g, " ");
-                    const escapedName = (item.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                    const escapedDesc = esc(item.description).replace(/\n/g, " ");
+                    const escapedName = esc(item.name);
                     container.innerHTML += `
                         <div class="card" id="${type}-${item.id}">
-                            ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width:100%; height:200px; object-fit:cover; border-bottom:1px solid #444;">` : fallbackImg}
+                            ${item.image ? `<img src="${item.image}" alt="${escapedName}" style="width:100%; height:200px; object-fit:cover; border-bottom:1px solid #444;">` : fallbackImg}
                             <div class="card-content">
                                 <h3 id="${type}-name-${item.id}" style="font-size:16px; margin-bottom:5px;">${item.name}</h3>
                                 <p id="${type}-desc-${item.id}" style="font-size:13px; color:#aaa; max-height:60px; overflow:hidden; text-overflow:ellipsis;">${item.description || '-'}</p>
@@ -1053,26 +1447,10 @@
                                 </div>
                             </div>
                         </div>`;
-                } else if (type === 'gallery') {
-                    const fallbackImg = `<div style="height:250px; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:#888; border-bottom: 2px solid var(--primary-color);">No Image</div>`;
-                    const escapedDesc = (item.description || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;").replace(/\n/g, " ");
-                    const escapedName = (item.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-                    container.innerHTML += `
-                        <div class="card" id="${type}-${item.id}">
-                            ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width:100%; height:200px; object-fit:cover; cursor:pointer; border-bottom:1px solid #444;" onclick="openLightbox('${item.image}', '${escapedName}', '${escapedDesc}')">` : fallbackImg}
-                            <div class="card-content">
-                                <h3 id="${type}-name-${item.id}" style="font-size:16px; margin-bottom:5px;">${item.name}</h3>
-                                <p id="${type}-desc-${item.id}" style="font-size:13px; color:#aaa; max-height:60px; overflow:hidden; text-overflow:ellipsis;">${item.description || '-'}</p>
-                                <div class="action-buttons" style="margin-top: 10px; display: flex; gap: 10px;">
-                                    <button class="btn" style="background-color: #555; color: white; padding: 3px 5px; font-size:12px;" onclick="editEntity('${type}', ${item.id})">Edit</button>
-                                    <button class="btn btn-danger" style="margin-top: 0; padding: 3px 5px; font-size:12px;" onclick="deleteEntity('${type}', ${item.id})">Delete</button>
-                                </div>
-                            </div>
-                        </div>`;
                 } else if (type === 'loot') {
                     const fallbackImg = `<div style="height:150px; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:#888; border-bottom: 1px solid var(--primary-color);">No Image</div>`;
-                    const escapedDesc = (item.description || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;").replace(/\n/g, " ");
-                    const escapedName = (item.name || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                    const escapedDesc = esc(item.description).replace(/\n/g, " ");
+                    const escapedName = esc(item.name);
                     
                     let holderName = "Group Stash / Unassigned";
                     let holderClass = "color:#aaa; border:1px solid #aaa;";
@@ -1087,7 +1465,7 @@
 
                     container.innerHTML += `
                         <div class="card" id="loot-${item.id}">
-                            ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width:100%; height:150px; object-fit:contain; background:#111; border-bottom:1px solid #444; cursor:pointer;" onclick="openLightbox('${item.image}', '${escapedName}', '${escapedDesc}')">` : fallbackImg}
+                            ${item.image ? `<img src="${item.image}" alt="${escapedName}" style="width:100%; height:150px; object-fit:contain; background:#111; border-bottom:1px solid #444; cursor:pointer;" onclick="openLightbox('${item.image}', '${escapedName}', '${escapedDesc}')">` : fallbackImg}
                             <div class="card-content">
                                 <div class="loot-holder-badge" style="${holderClass}">${holderName}</div>
                                 <h3 id="loot-name-${item.id}" style="font-size:16px; margin:0 0 5px 0;">${item.name}</h3>
@@ -1117,8 +1495,8 @@
                 const appEl = document.getElementById(`chars-app-${id}`);
                 extraFieldsHTML = `
                     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="chars-edit-bg-${id}" value="${bgEl ? bgEl.innerText : ''}" placeholder="Background" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; box-sizing: border-box;">
-                        <input type="text" id="chars-edit-age-${id}" value="${ageEl ? ageEl.innerText : ''}" placeholder="Age" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; box-sizing: border-box;">
+                        <input type="text" id="chars-edit-bg-${id}" value="${esc(bgEl ? bgEl.innerText : '')}" placeholder="Background" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; box-sizing: border-box;">
+                        <input type="text" id="chars-edit-age-${id}" value="${esc(ageEl ? ageEl.innerText : '')}" placeholder="Age" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; box-sizing: border-box;">
                     </div>
                     <textarea id="chars-edit-app-${id}" placeholder="Appearance" style="width: 100%; height: 80px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; white-space: pre-wrap; box-sizing: border-box;">${appEl ? appEl.innerText : ''}</textarea>
                     <label class="file-upload-label" style="margin-bottom: 5px; color:#9c27b0;">New Spellbook Cover (optional):</label>
@@ -1133,7 +1511,7 @@
                 const appEl = document.getElementById(`npcs-app-${id}`);
                 const specialEl = document.getElementById(`npcs-special-${id}`);
                 extraFieldsHTML = `
-                    <input type="text" id="npcs-edit-faction-${id}" value="${factionEl ? factionEl.innerText : ''}" placeholder="Faction Alignment" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+                    <input type="text" id="npcs-edit-faction-${id}" value="${esc(factionEl ? factionEl.innerText : '')}" placeholder="Faction Alignment" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
                     <textarea id="npcs-edit-app-${id}" placeholder="Appearance" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${appEl ? appEl.innerText : ''}</textarea>
                     <textarea id="npcs-edit-special-${id}" placeholder="Special" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${specialEl ? specialEl.innerText : ''}</textarea>
                     <label class="file-upload-label" style="margin-bottom: 5px;">Change Relationship:</label>
@@ -1144,15 +1522,15 @@
                 const goalEl = document.getElementById(`factions-goal-${id}`);
                 const knownEl = document.getElementById(`factions-known-${id}`);
                 extraFieldsHTML = `
-                    <input type="text" id="factions-edit-leader-${id}" value="${leaderEl ? leaderEl.innerText : ''}" placeholder="Leader" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+                    <input type="text" id="factions-edit-leader-${id}" value="${esc(leaderEl ? leaderEl.innerText : '')}" placeholder="Leader" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
                     <textarea id="factions-edit-goal-${id}" placeholder="Goal" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${goalEl ? goalEl.innerText : ''}</textarea>
                     <textarea id="factions-edit-known-${id}" placeholder="Known for" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${knownEl ? knownEl.innerText : ''}</textarea>
                 `;
             } else if (type === 'dragons') {
-                const physEl = document.getElementById('dragons-phys-' + id);
-                const abilEl = document.getElementById('dragons-abil-' + id);
-                const behavEl = document.getElementById('dragons-behav-' + id);
-                const habEl = document.getElementById('dragons-hab-' + id);
+                const physEl = document.getElementById(`dragons-phys-${id}`);
+                const abilEl = document.getElementById(`dragons-abil-${id}`);
+                const behavEl = document.getElementById(`dragons-behav-${id}`);
+                const habEl = document.getElementById(`dragons-hab-${id}`);
                 extraFieldsHTML = `
                     <textarea id="dragons-edit-phys-${id}" placeholder="Physiology" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${physEl ? physEl.innerText : ''}</textarea>
                     <textarea id="dragons-edit-abil-${id}" placeholder="Abilities" style="width: 100%; height: 60px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">${abilEl ? abilEl.innerText : ''}</textarea>
@@ -1162,12 +1540,8 @@
             } else if (type === 'loot') {
                 const holderEl = document.getElementById(`loot-holder-${id}`);
                 const currentHolder = holderEl ? holderEl.getAttribute('data-id') : '';
-                
                 let opts = '<option value="">-- Group Stash / Unassigned --</option>';
-                charactersData.forEach(c => {
-                    opts += `<option value="${c.id}" ${currentHolder == c.id ? 'selected' : ''}>${c.name}</option>`;
-                });
-                
+                charactersData.forEach(c => { opts += `<option value="${c.id}" ${currentHolder == c.id ? 'selected' : ''}>${c.name}</option>`; });
                 extraFieldsHTML = `
                     <label class="file-upload-label" style="margin-bottom: 5px;">Who is holding it?</label>
                     <select id="loot-edit-holder-${id}" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
@@ -1177,11 +1551,12 @@
             }
 
             const container = (type === 'protocols') ? document.getElementById(`protocol-page-${id}`) :
-                              (type === 'chars' || type === 'dragons' || type === 'npcs' || type === 'factions' || type === 'bastion') ? document.querySelector(`#${type}-${id} .dnd-sheet-full`) : 
+                              (type === 'diary') ? document.getElementById(`diary-page-${id}`) :
+                              (type === 'chars' || type === 'dragons' || type === 'npcs' || type === 'factions') ? document.querySelector(`#${type}-${id} .dnd-sheet-full`) : 
                               document.querySelector(`#${type}-${id} .card-content`);
             
             container.innerHTML = `
-                <input type="text" id="${type}-edit-name-${id}" value="${currentName}" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; font-family: 'Cinzel', serif; margin-bottom: 10px; box-sizing: border-box;">
+                <input type="text" id="${type}-edit-name-${id}" value="${esc(currentName)}" style="width: 100%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-color); padding: 8px; font-family: 'Cinzel', serif; margin-bottom: 10px; box-sizing: border-box;">
                 ${extraFieldsHTML}
                 <label class="file-upload-label" style="margin-bottom: 5px;">New Image (optional):</label>
                 <input type="file" id="${type}-edit-image-${id}" accept="image/*" style="width: 100%; margin-bottom: 10px; color: #fff; box-sizing: border-box;">
@@ -1240,6 +1615,7 @@
             if (type === 'bastion') prefix = 'bastion';
             if (type === 'protocols') prefix = 'protocol';
             if (type === 'loot') prefix = 'loot';
+            if (type === 'diary') prefix = 'diary';
 
             const name = document.getElementById(`${prefix}-name`).value;
             if(!name) return alert("Title/Name cannot be empty!");
@@ -1272,6 +1648,10 @@
                 formData.append('habitat', document.getElementById(`${prefix}-habitat`).value);
             } else if (type === 'loot') {
                 formData.append('holder_id', document.getElementById(`loot-holder-id`).value);
+            } else if (type === 'diary') {
+                const charId = document.getElementById('diary-char-select').value;
+                if(!charId) return alert("Please select a character first!");
+                formData.append('character_id', charId);
             }
             
             const fileInput = document.getElementById(`${prefix}-image`);
@@ -1297,6 +1677,7 @@
                 document.getElementById(`details-${type}`).removeAttribute('open');
                 
                 if (type === 'protocols') { isProtocolBookOpen = true; }
+                if (type === 'diary') { isDiaryBookOpen = true; activeDiaryIndex = allDiaryEntries.length; } 
                 
                 loadEntities(type);
             } else {
@@ -1545,15 +1926,15 @@
 
             const container = document.getElementById(`spell-page-${id}`);
             container.innerHTML = `
-                <input type="text" id="edit-spell-name-${id}" value="${nameEl ? nameEl.innerText : ''}" placeholder="Name" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px; font-weight:bold;">
-                <input type="text" id="edit-spell-source-${id}" value="${sourceEl ? sourceEl.innerText : ''}" placeholder="Source" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
-                <input type="text" id="edit-spell-level-${id}" value="${levelEl ? levelEl.innerText : ''}" placeholder="Level & School" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
-                <input type="text" id="edit-spell-cast-${id}" value="${castEl ? castEl.innerText : ''}" placeholder="Casting Time" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
-                <input type="text" id="edit-spell-range-${id}" value="${rangeEl ? rangeEl.innerText : ''}" placeholder="Range" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
-                <input type="text" id="edit-spell-comp-${id}" value="${compEl ? compEl.innerText : ''}" placeholder="Components" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
-                <input type="text" id="edit-spell-dur-${id}" value="${durEl ? durEl.innerText : ''}" placeholder="Duration" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-name-${id}" value="${esc(nameEl ? nameEl.innerText : '')}" placeholder="Name" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px; font-weight:bold;">
+                <input type="text" id="edit-spell-source-${id}" value="${esc(sourceEl ? sourceEl.innerText : '')}" placeholder="Source" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-level-${id}" value="${esc(levelEl ? levelEl.innerText : '')}" placeholder="Level & School" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-cast-${id}" value="${esc(castEl ? castEl.innerText : '')}" placeholder="Casting Time" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-range-${id}" value="${esc(rangeEl ? rangeEl.innerText : '')}" placeholder="Range" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-comp-${id}" value="${esc(compEl ? compEl.innerText : '')}" placeholder="Components" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
+                <input type="text" id="edit-spell-dur-${id}" value="${esc(durEl ? durEl.innerText : '')}" placeholder="Duration" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">
                 <textarea id="edit-spell-desc-${id}" placeholder="Description" style="width: 100%; height: 100px; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 5px;">${descEl ? descEl.innerText : ''}</textarea>
-                <input type="text" id="edit-spell-class-${id}" value="${classEl ? classEl.innerText : ''}" placeholder="Classes" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 10px;">
+                <input type="text" id="edit-spell-class-${id}" value="${esc(classEl ? classEl.innerText : '')}" placeholder="Classes" style="width: 100%; background: #fff; color: #000; border: 1px solid #8b5a2b; padding: 5px; margin-bottom: 10px;">
                 <div class="action-buttons" style="display: flex; gap: 10px;">
                     <button class="btn" style="background-color: #5c3a21; color: white;" onclick="saveSpellEdit(${id})">Save</button>
                     <button class="btn btn-danger" style="margin-top: 0;" onclick="loadSpells()">Cancel</button>
@@ -1792,12 +2173,13 @@
         loadEntities('npcs');
         loadEntities('factions');
         loadEntities('dragons');
-        loadEntities('gallery');
+        loadEntities('diary'); 
         loadEntities('bastion');
         loadEntities('protocols');
         loadEntities('loot'); 
         loadTreasury();       
         loadQuests();
+        loadCampaignState(); 
 
     </script>
 </body>
